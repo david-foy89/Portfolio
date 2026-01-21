@@ -236,7 +236,7 @@ function createRepositoryCard(repo) {
         // Check if this might be a GitHub Pages site
         const potentialUrl = `https://${repo.owner.login}.github.io/${repo.name}`;
         demoUrl = potentialUrl;
-        demoText = 'Try GitHub Pages';
+        demoText = 'GitHub Pages';
         hasDemo = true; // We'll show the button, user can click to test
     }
     
