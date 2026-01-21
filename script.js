@@ -202,25 +202,32 @@ function createRepositoryCard(repo) {
     
     // Check homepage URL first
     if (repo.homepage && repo.homepage.trim() !== '') {
-        hasDemo = true;
-        demoUrl = repo.homepage;
-        
-        // Customize demo text based on platform
-        const url = repo.homepage.toLowerCase();
-        if (url.includes('github.io')) {
+        // Special handling for TechForum repository with incorrect homepage
+        if (repo.name === 'TechForum---Advanced-Developer-Q-A-Platform' && repo.homepage.includes('Project4')) {
+            hasDemo = true;
+            demoUrl = `https://${repo.owner.login}.github.io/${repo.name}`;
             demoText = 'GitHub Pages';
-        } else if (url.includes('netlify')) {
-            demoText = 'Netlify Demo';
-        } else if (url.includes('vercel')) {
-            demoText = 'Vercel Demo';
-        } else if (url.includes('heroku')) {
-            demoText = 'Heroku Demo';
-        } else if (url.includes('replit')) {
-            demoText = 'Replit Demo';
-        } else if (url.includes('codepen')) {
-            demoText = 'CodePen';
-        } else if (url.includes('codesandbox')) {
-            demoText = 'CodeSandbox';
+        } else {
+            hasDemo = true;
+            demoUrl = repo.homepage;
+            
+            // Customize demo text based on platform
+            const url = repo.homepage.toLowerCase();
+            if (url.includes('github.io')) {
+                demoText = 'GitHub Pages';
+            } else if (url.includes('netlify')) {
+                demoText = 'Netlify Demo';
+            } else if (url.includes('vercel')) {
+                demoText = 'Vercel Demo';
+            } else if (url.includes('heroku')) {
+                demoText = 'Heroku Demo';
+            } else if (url.includes('replit')) {
+                demoText = 'Replit Demo';
+            } else if (url.includes('codepen')) {
+                demoText = 'CodePen';
+            } else if (url.includes('codesandbox')) {
+                demoText = 'CodeSandbox';
+            }
         }
     }
     
