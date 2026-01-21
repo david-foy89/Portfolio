@@ -234,7 +234,9 @@ function createRepositoryCard(repo) {
     // Additional fallback: Try standard GitHub Pages URL for web projects
     if (!hasDemo && (repo.language === 'HTML' || repo.language === 'JavaScript' || repo.language === 'CSS')) {
         // Check if this might be a GitHub Pages site
-        const potentialUrl = `https://${repo.owner.login}.github.io/${repo.name}`;
+        // Encode the repository name to handle special characters
+        const encodedRepoName = encodeURIComponent(repo.name);
+        const potentialUrl = `https://${repo.owner.login}.github.io/${encodedRepoName}`;
         demoUrl = potentialUrl;
         demoText = 'GitHub Pages';
         hasDemo = true; // We'll show the button, user can click to test
