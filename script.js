@@ -1507,6 +1507,7 @@ async function loadRepositories() {
     );
 
     repositories = repos.filter((repo) => !repo.fork && !repo.archived);
+    await enrichReposWithLanguages(repositories);
 
     filteredRepos = [...repositories];
     updateLanguageFilter();
@@ -1522,10 +1523,53 @@ async function loadRepositories() {
   }
 }
 
+async function enrichReposWithLanguages(repos) {
+  const concurrency = 6;
+
+  async function attachLanguages(repo) {
+    try {
+      const breakdown = await fetchGitHub(
+        `/repos/${GITHUB_USERNAME}/${repo.name}/languages`
+      );
+      repo.languages = Object.entries(breakdown)
+        .sort((a, b) => b[1] - a[1])
+        .map(([name]) => name);
+    } catch {
+      repo.languages = repo.language ? [repo.language] : [];
+    }
+  }
+
+  for (let i = 0; i < repos.length; i += concurrency) {
+    await Promise.all(repos.slice(i, i + concurrency).map(attachLanguages));
+  }
+}
+
+function getRepoLanguages(repo) {
+  if (Array.isArray(repo.languages) && repo.languages.length) {
+    return repo.languages;
+  }
+  return repo.language ? [repo.language] : [];
+}
+
+function buildLanguagesHtml(repo) {
+  const languages = getRepoLanguages(repo);
+  if (!languages.length) return '';
+
+  return `<div class="project-languages">${languages
+    .map((lang) => {
+      const color = languageColors[lang] || '#858585';
+      return `<span class="language-item">
+          <span class="language-color" style="background-color: ${color}"></span>
+          <span class="language-name">${escapeHtml(lang)}</span>
+        </span>`;
+    })
+    .join('')}</div>`;
+}
+
 function updateLanguageFilter() {
   const languages = new Set();
   repositories.forEach((repo) => {
-    if (repo.language) languages.add(repo.language);
+    getRepoLanguages(repo).forEach((lang) => languages.add(lang));
   });
 
   const sortedLanguages = Array.from(languages).sort();
@@ -1539,7 +1583,9 @@ function filterRepositories() {
   filteredRepos =
     selectedLanguage === ''
       ? [...repositories]
-      : repositories.filter((repo) => repo.language === selectedLanguage);
+      : repositories.filter((repo) =>
+          getRepoLanguages(repo).includes(selectedLanguage)
+        );
   sortRepositories();
 }
 
@@ -1548,8 +1594,6 @@ function sortRepositories() {
 
   filteredRepos.sort((a, b) => {
     switch (sortBy) {
-      case 'stars':
-        return b.stargazers_count - a.stargazers_count;
       case 'name':
         return a.name.localeCompare(b.name);
       case 'created':
@@ -1612,18 +1656,8 @@ function createRepositoryCard(repo) {
     ? buildDescriptionBlock(escapeHtml(descriptionText))
     : buildDescriptionBlock('', { empty: true });
 
-  const language = repo.language;
-  const languageColor = languageColors[language] || '#858585';
-  const languageHtml = language
-    ? `<div class="project-languages">
-        <div class="language-item">
-          <span class="language-color" style="background-color: ${languageColor}"></span>
-          <span class="language-name">${escapeHtml(language)}</span>
-        </div>
-      </div>`
-    : '';
-
-  const stars = repo.stargazers_count ?? 0;
+  const languages = getRepoLanguages(repo);
+  const languageHtml = buildLanguagesHtml(repo);
   const liveLink = getRepoLiveLink(repo);
   const liveLinkHtml = liveLink
     ? `<a href="${escapeHtml(liveLink.url)}" target="_blank" rel="noopener noreferrer" class="project-link project-link--live">
@@ -1633,7 +1667,7 @@ function createRepositoryCard(repo) {
     : '';
 
   return `
-    <article class="project-card card reveal-child" data-language="${escapeHtml(language || '')}">
+    <article class="project-card card reveal-child" data-languages="${escapeHtml(languages.join(','))}">
       <div class="project-header">
         <h3 class="project-title">
           <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer">${escapeHtml(repo.name)}</a>
@@ -1641,12 +1675,6 @@ function createRepositoryCard(repo) {
       </div>
       ${descriptionBlock}
       ${languageHtml}
-      <div class="project-meta">
-        <div class="meta-item" title="Stars">
-          <i class="fas fa-star" aria-hidden="true"></i>
-          <span>${stars}</span>
-        </div>
-      </div>
       <div class="project-links">
         ${liveLinkHtml}
         <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="project-link project-link--github">

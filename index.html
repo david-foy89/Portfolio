@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://davidkfoy.com" />
     <title>David Foy — Full Stack Developer</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=9" />
+    <link rel="stylesheet" href="styles.css?v=11" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -74,7 +74,8 @@
           </p>
           <div class="hero-title-wrap">
             <h1 class="hero-title hero-stagger" style="--stagger: 80ms">
-              Hi, I'm <span class="highlight">David Foy</span>
+              <span class="hero-title__intro">Hi, I'm</span>
+              <span class="hero-title__name highlight">David Foy</span>
             </h1>
           </div>
           <p class="hero-subheading hero-stagger" style="--stagger: 160ms">
@@ -128,16 +129,32 @@
               role="tabpanel"
               aria-labelledby="hero-demo-tab-0"
             >
-              <div class="hero-demo__scaler">
-                <iframe
-                  class="hero-demo__frame"
-                  id="hero-demo-frame"
-                  title="TechForum live preview"
-                  src="https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-                ></iframe>
+              <div class="hero-demo__stage">
+                <div class="hero-demo__pane is-active" data-hero-pane="0">
+                  <div class="hero-demo__scaler">
+                    <iframe
+                      class="hero-demo__frame"
+                      id="hero-demo-frame-0"
+                      title="TechForum live preview"
+                      src="https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/"
+                      referrerpolicy="no-referrer-when-downgrade"
+                      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+                    ></iframe>
+                  </div>
+                </div>
+                <div class="hero-demo__pane" data-hero-pane="1">
+                  <div class="hero-demo__scaler">
+                    <iframe
+                      class="hero-demo__frame"
+                      id="hero-demo-frame-1"
+                      title="LastWarTools live preview"
+                      src="https://david-foy89.github.io/LastWarTools/"
+                      loading="lazy"
+                      referrerpolicy="no-referrer-when-downgrade"
+                      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+                    ></iframe>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="hero-demo__actions">
@@ -443,7 +460,6 @@
               </select>
               <select id="sort-repos" class="filter-select">
                 <option value="updated">Recently Updated</option>
-                <option value="stars">Most Stars</option>
                 <option value="name">Name (A-Z)</option>
                 <option value="created">Recently Created</option>
               </select>
@@ -702,6 +718,6 @@
       </div>
     </div>
 
-    <script src="script.js?v=14"></script>
+    <script src="script.js?v=15"></script>
   </body>
 </html>
