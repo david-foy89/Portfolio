@@ -225,6 +225,23 @@ function initHeroDemoShowcase() {
     });
   }
 
+  function ensureHeroFrameLoaded(index) {
+    const demo = HERO_FEATURED_DEMOS[index];
+    const heroFrame = heroFrames[index];
+    if (!demo || !heroFrame) return;
+
+    heroFrame.removeAttribute('loading');
+    const target = normalizeFrameUrl(demo.url);
+    const current = normalizeFrameUrl(heroFrame.src);
+    if (!current || current !== target) {
+      heroFrame.src = demo.url;
+    }
+  }
+
+  function preloadHeroFrames() {
+    HERO_FEATURED_DEMOS.forEach((_, index) => ensureHeroFrameLoaded(index));
+  }
+
   const prefersReducedMotion = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
   ).matches;
@@ -432,6 +449,7 @@ function initHeroDemoShowcase() {
     syncDemoLinks(demo);
 
     setActiveHeroPane(index);
+    ensureHeroFrameLoaded(index);
 
     const activeFrame = getActiveHeroFrame();
     activeFrame.title = `${demo.title} live preview`;
@@ -513,6 +531,7 @@ function initHeroDemoShowcase() {
   });
 
   updateHeroDemoScale();
+  preloadHeroFrames();
   setDemo(0);
   startRotate();
 }
