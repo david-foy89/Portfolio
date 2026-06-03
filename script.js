@@ -936,6 +936,14 @@ function initBackToTop() {
   });
 }
 
+function applyRevealStagger(group, step = 0.08, maxDelay = 1.2) {
+  const children = group.querySelectorAll(':scope > .reveal-child');
+  children.forEach((child, index) => {
+    const delay = Math.min(index * step, maxDelay);
+    child.style.setProperty('--reveal-delay', `${delay}s`);
+  });
+}
+
 function initScrollReveal() {
   const revealObserver = new IntersectionObserver(
     (entries) => {
@@ -954,6 +962,7 @@ function initScrollReveal() {
   });
 
   document.querySelectorAll('.reveal-group').forEach((group) => {
+    applyRevealStagger(group);
     revealObserver.observe(group);
   });
 }
@@ -1095,9 +1104,8 @@ function displayRepositories() {
     return;
   }
 
-  projectsGrid.classList.add('reveal-group');
   projectsGrid.innerHTML = filteredRepos.map(createRepositoryCard).join('');
-  observeRepoCards();
+  applyRevealStagger(projectsGrid);
 }
 
 function createRepositoryCard(repo) {
@@ -1141,35 +1149,6 @@ function createRepositoryCard(repo) {
       </div>
     </article>
   `;
-}
-
-let repoGridObserver;
-
-function observeRepoCards() {
-  if (repoGridObserver) repoGridObserver.disconnect();
-
-  projectsGrid.classList.add('reveal-group');
-
-  const cards = projectsGrid.querySelectorAll('.reveal-child');
-  cards.forEach((card, index) => {
-    card.style.transitionDelay = `${(index % 6) * 0.1}s`;
-  });
-
-  if (projectsGrid.classList.contains('is-visible')) return;
-
-  repoGridObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          repoGridObserver.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
-  );
-
-  repoGridObserver.observe(projectsGrid);
 }
 
 function escapeHtml(text) {

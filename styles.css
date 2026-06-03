@@ -315,25 +315,7 @@ body.page-loaded .hero-stagger {
 .reveal-group.is-visible .reveal-child {
   opacity: 1;
   transform: translateY(0);
-}
-
-.reveal-group.is-visible .reveal-child:nth-child(1) {
-  transition-delay: 0s;
-}
-.reveal-group.is-visible .reveal-child:nth-child(2) {
-  transition-delay: 0.1s;
-}
-.reveal-group.is-visible .reveal-child:nth-child(3) {
-  transition-delay: 0.2s;
-}
-.reveal-group.is-visible .reveal-child:nth-child(4) {
-  transition-delay: 0.3s;
-}
-.reveal-group.is-visible .reveal-child:nth-child(5) {
-  transition-delay: 0.4s;
-}
-.reveal-group.is-visible .reveal-child:nth-child(6) {
-  transition-delay: 0.5s;
+  transition-delay: var(--reveal-delay, 0s);
 }
 
 /* Glass cards */
