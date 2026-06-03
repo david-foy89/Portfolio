@@ -18,6 +18,14 @@ const REPO_DESCRIPTIONS = {
     'React todo app with Redux Toolkit — CRUD tasks, All/Active/Completed filters, localStorage persistence, and a contact form with controlled inputs.',
 };
 
+/** Correct live demo URLs (overrides stale GitHub homepage fields) */
+const REPO_LIVE_DEMOS = {
+  'TechForum---Advanced-Developer-Q-A-Platform':
+    'https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/',
+  LastWarTools: 'https://david-foy89.github.io/LastWarTools/',
+  Giphy_Project: 'https://david-foy89.github.io/Giphy_Project/index.html',
+};
+
 const languageColors = {
   JavaScript: '#f1e05a',
   Python: '#3572A5',
@@ -1134,6 +1142,14 @@ function getRepoDescription(repo) {
   return null;
 }
 
+function getRepoLiveDemo(repo) {
+  const override = REPO_LIVE_DEMOS[repo.name];
+  if (override) return override;
+  const homepage = repo.homepage?.trim();
+  if (!homepage || homepage.includes('/Project4')) return null;
+  return homepage;
+}
+
 function createRepositoryCard(repo) {
   const descriptionText = getRepoDescription(repo);
   const description = descriptionText
@@ -1152,6 +1168,13 @@ function createRepositoryCard(repo) {
     : '';
 
   const stars = repo.stargazers_count ?? 0;
+  const liveDemo = getRepoLiveDemo(repo);
+  const liveDemoHtml = liveDemo
+    ? `<a href="${escapeHtml(liveDemo)}" target="_blank" rel="noopener noreferrer" class="project-link project-link--demo">
+          <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          Live Demo
+        </a>`
+    : '';
 
   return `
     <article class="project-card card reveal-child" data-language="${escapeHtml(language || '')}">
@@ -1169,6 +1192,7 @@ function createRepositoryCard(repo) {
         </div>
       </div>
       <div class="project-links">
+        ${liveDemoHtml}
         <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="project-link">
           <i class="fab fa-github" aria-hidden="true"></i>
           View on GitHub
