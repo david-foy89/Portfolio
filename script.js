@@ -31,7 +31,7 @@ const REPO_LIVE_LINKS = {
     label: 'Live Demo',
   },
   LastWarTools: {
-    url: 'https://david-foy89.github.io/LastWarTools/',
+    url: 'https://david-foy89.github.io/LastWarTools/index.html',
     label: 'Live Site',
   },
   'Kanban-Board': {
@@ -106,7 +106,7 @@ const HERO_FEATURED_DEMOS = [
   {
     title: 'LastWarTools',
     host: 'LastWarTools — GitHub Pages',
-    url: 'https://david-foy89.github.io/LastWarTools/',
+    url: 'https://david-foy89.github.io/LastWarTools/index.html',
     label: 'Live Site',
   },
 ];
@@ -249,8 +249,6 @@ function initHeroDemoShowcase() {
   let activeIndex = 0;
   let rotateTimer = null;
   let interactResumeTimer = null;
-  let scrollLockY = null;
-  let scrollLockRaf = null;
   let popoutPreviousFocus = null;
 
   function isPopoutOpen() {
@@ -344,7 +342,6 @@ function initHeroDemoShowcase() {
     popoutRoot.classList.add('is-open');
     popoutRoot.setAttribute('aria-hidden', 'false');
     document.body.classList.add('hero-demo-popout-open');
-    unlockPageScroll();
 
     expandBtn?.setAttribute('aria-expanded', 'true');
     popoutPreviousFocus = document.activeElement;
@@ -379,45 +376,13 @@ function initHeroDemoShowcase() {
     });
   }
 
-  function preservePageScroll() {
-    const y = scrollLockY ?? window.scrollY;
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: y, left: 0, behavior: 'instant' });
-    });
-  }
-
-  function lockPageScroll() {
-    scrollLockY = window.scrollY;
-    if (scrollLockRaf) return;
-    const tick = () => {
-      if (scrollLockY !== null && window.scrollY !== scrollLockY) {
-        window.scrollTo({ top: scrollLockY, left: 0, behavior: 'instant' });
-      }
-      scrollLockRaf = requestAnimationFrame(tick);
-    };
-    scrollLockRaf = requestAnimationFrame(tick);
-  }
-
-  function unlockPageScroll() {
-    scrollLockY = null;
-    if (scrollLockRaf) {
-      cancelAnimationFrame(scrollLockRaf);
-      scrollLockRaf = null;
-    }
-  }
-
   function isHeroEngaged() {
-    return (
-      isPopoutOpen() ||
-      root.matches(':hover') ||
-      heroFrames.some((f) => document.activeElement === f)
-    );
+    return isPopoutOpen() || root.matches(':hover');
   }
 
   function onHeroDisengage() {
     requestAnimationFrame(() => {
       if (isHeroEngaged()) return;
-      unlockPageScroll();
       clearTimeout(interactResumeTimer);
       interactResumeTimer = setTimeout(() => startRotate(), 4000);
     });
@@ -489,27 +454,12 @@ function initHeroDemoShowcase() {
     panel.addEventListener('wheel', pauseRotateForInteraction, { passive: true });
   }
 
-  heroFrames.forEach((heroFrame) => {
-    heroFrame.addEventListener('focus', () => {
-      pauseRotateForInteraction();
-      lockPageScroll();
-      preservePageScroll();
-    });
-
-    heroFrame.addEventListener('blur', onHeroDisengage);
-    heroFrame.addEventListener('pointerenter', () => {
-      stopRotate();
-      lockPageScroll();
-    });
-    heroFrame.addEventListener('pointerleave', onHeroDisengage);
-    heroFrame.addEventListener('load', preservePageScroll);
-  });
-
-  root.addEventListener('pointerenter', () => {
-    stopRotate();
-    lockPageScroll();
-  });
+  root.addEventListener('pointerenter', stopRotate);
   root.addEventListener('pointerleave', onHeroDisengage);
+
+  heroFrames.forEach((heroFrame) => {
+    heroFrame.addEventListener('pointerdown', pauseRotateForInteraction);
+  });
 
   expandBtn?.addEventListener('click', openPopout);
   popoutClose?.addEventListener('click', closePopout);
