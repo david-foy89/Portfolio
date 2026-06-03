@@ -1,35 +1,30 @@
-// Global variables
-let repositories = [];
-let filteredRepos = [];
-let currentUser = '';
+const GITHUB_USERNAME = 'david-foy89';
 
-// Language colors mapping
 const languageColors = {
-    'JavaScript': '#f1e05a',
-    'Python': '#3572A5',
-    'HTML': '#e34c26',
-    'CSS': '#1572B6',
-    'TypeScript': '#2b7489',
-    'Java': '#b07219',
-    'C#': '#239120',
-    'C++': '#f34b7d',
-    'Go': '#00ADD8',
-    'Rust': '#dea584',
-    'PHP': '#4F5D95',
-    'Ruby': '#701516',
-    'Swift': '#ffac45',
-    'Kotlin': '#F18E33',
-    'Dart': '#00B4AB',
-    'Shell': '#89e051',
-    'Vue': '#2c3e50',
-    'Jupyter Notebook': '#DA5B0B'
+  JavaScript: '#f1e05a',
+  Python: '#3572A5',
+  HTML: '#e34c26',
+  CSS: '#1572B6',
+  TypeScript: '#2b7489',
+  Java: '#b07219',
+  'C#': '#239120',
+  'C++': '#f34b7d',
+  Go: '#00ADD8',
+  Rust: '#dea584',
+  PHP: '#4F5D95',
+  Ruby: '#701516',
+  Swift: '#ffac45',
+  Kotlin: '#F18E33',
+  Dart: '#00B4AB',
+  Shell: '#89e051',
+  Vue: '#2c3e50',
+  'Jupyter Notebook': '#DA5B0B',
 };
 
-// DOM Elements
+let repositories = [];
+let filteredRepos = [];
 const hamburger = document.querySelector('.hamburger');
 const navMenu = document.querySelector('.nav-menu');
-const githubInput = document.getElementById('github-username');
-const loadReposBtn = document.getElementById('load-repos');
 const projectsGrid = document.getElementById('projects-grid');
 const loading = document.getElementById('loading');
 const errorMessage = document.getElementById('error-message');
@@ -37,427 +32,1221 @@ const languageFilter = document.getElementById('language-filter');
 const sortRepos = document.getElementById('sort-repos');
 const gridViewBtn = document.getElementById('grid-view');
 const listViewBtn = document.getElementById('list-view');
+const retryReposBtn = document.getElementById('retry-repos');
+const contactForm = document.getElementById('contact-form');
+const formStatus = document.getElementById('form-status');
+const cursorDot = document.getElementById('cursor-dot');
+const cursorRing = document.getElementById('cursor-ring');
 
-// Initialize the app
-document.addEventListener('DOMContentLoaded', function() {
-    initializeEventListeners();
-    
-    // Set david-foy89 as the default username
-    const defaultUsername = 'david-foy89';
-    githubInput.value = defaultUsername;
-    
-    // Automatically load repositories for david-foy89
-    setTimeout(() => {
-        loadRepositories();
-    }, 500); // Small delay to ensure UI is ready
+const backToTopBtn = document.getElementById('back-to-top');
+
+document.addEventListener('DOMContentLoaded', () => {
+  initPageLoad();
+  initBackgroundCanvas();
+  initializeEventListeners();
+  initCustomCursor();
+  initNavObserver();
+  initScrollReveal();
+  initBackToTop();
+  loadRepositories();
 });
 
-// Event Listeners
-function initializeEventListeners() {
-    // Mobile navigation toggle
-    hamburger.addEventListener('click', toggleMobileNav);
-    
-    // Smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
+function initPageLoad() {
+  requestAnimationFrame(() => {
+    document.body.classList.add('page-loaded');
+  });
+}
+
+function initBackgroundCanvas() {
+  const canvas = document.getElementById('bg-canvas');
+  const sketchToggle = document.getElementById('bg-sketch-toggle');
+  const playHint = document.getElementById('bg-play-hint');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const prefersReducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)'
+  ).matches;
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  const INTERACTIVE =
+    'a, button, .btn, .project-link, .view-btn, .contact-item, .hamburger, .back-to-top, .bg-sketch-toggle, input, textarea, select, label';
+
+  const mouse = { x: 0, y: 0, active: false };
+  const palette = {
+    node: 'rgba(91, 154, 255, 0.85)',
+    nodeUser: 'rgba(140, 190, 255, 1)',
+    line: 'rgba(45, 108, 223, 0.35)',
+    lineBright: 'rgba(91, 154, 255, 0.55)',
+    lineUser: 'rgba(91, 154, 255, 0.75)',
+    lineChain: 'rgba(140, 190, 255, 0.9)',
+    preview: 'rgba(91, 154, 255, 0.45)',
+    selected: 'rgba(91, 154, 255, 0.35)',
+  };
+
+  let width = 0;
+  let height = 0;
+  let nodes = [];
+  let ambientNodes = [];
+  let userNodes = [];
+  let userLinks = [];
+  let floatingShapes = [];
+  let nextNodeId = 1;
+  let nextShapeId = 1;
+  let animationId = null;
+  let isVisible = true;
+  let sketchMode = false;
+  let shiftHeld = false;
+  let selectedId = null;
+  let draggingNode = null;
+  let pointerId = null;
+  let linkPreview = null;
+  let shapeDrag = null;
+  let dragMoved = false;
+  let pointerDownX = 0;
+  let pointerDownY = 0;
+  let flingSamples = [];
+  let flingTarget = null;
+  let lastClickAt = 0;
+  let lastClickX = 0;
+  let lastClickY = 0;
+
+  const MAX_USER_NODES = 160;
+  const DRAG_THRESHOLD = 6;
+  const playHintDesktop = playHint?.innerHTML ?? '';
+
+  function isSketching(e) {
+    return sketchMode || shiftHeld || Boolean(e?.shiftKey);
+  }
+
+  function setSketchMode(on) {
+    sketchMode = on;
+    document.body.classList.toggle('bg-sketch-active', on);
+    if (sketchToggle) {
+      sketchToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    if (playHint) {
+      playHint.hidden = !on;
+      playHint.classList.toggle('is-visible', on);
+      if (on && isCoarsePointer) {
+        playHint.innerHTML =
+          'Tap to chain dots · drag &amp; fling your shape to float · double-click ends chain · <strong>Draw</strong> to exit';
+      } else if (on) {
+        playHint.innerHTML = playHintDesktop;
+      }
+    }
+  }
+
+  function endChain() {
+    selectedId = null;
+    linkPreview = null;
+  }
+
+  function recordFlingSample(x, y) {
+    const now = performance.now();
+    flingSamples.push({ x, y, t: now });
+    if (flingSamples.length > 12) flingSamples.shift();
+  }
+
+  function isDoubleClick(x, y) {
+    const now = performance.now();
+    const isDouble =
+      now - lastClickAt < 420 &&
+      Math.hypot(x - lastClickX, y - lastClickY) < 18;
+    lastClickAt = now;
+    lastClickX = x;
+    lastClickY = y;
+    return isDouble;
+  }
+
+  function computeFlingVelocity(samples) {
+    if (samples.length < 2) return { vx: 0, vy: 0 };
+
+    const last = samples[samples.length - 1];
+    const prev = samples[Math.max(0, samples.length - 4)];
+    const dt = (last.t - prev.t) / 1000;
+    if (dt < 0.008) return { vx: 0, vy: 0 };
+
+    let vx = ((last.x - prev.x) / dt) * 0.45;
+    let vy = ((last.y - prev.y) / dt) * 0.45;
+    const maxSpeed = 14;
+    const mag = Math.hypot(vx, vy);
+    if (mag > maxSpeed) {
+      vx = (vx / mag) * maxSpeed;
+      vy = (vy / mag) * maxSpeed;
+    }
+    return { vx, vy };
+  }
+
+  function resolveFlingVelocity(samples, dragDx, dragDy) {
+    let { vx, vy } = computeFlingVelocity(samples);
+    const speed = Math.hypot(vx, vy);
+    const dragLen = Math.hypot(dragDx, dragDy);
+
+    if (speed < 0.4 && dragLen > 8) {
+      vx = (dragDx / dragLen) * Math.min(4.5, dragLen * 0.12);
+      vy = (dragDy / dragLen) * Math.min(4.5, dragLen * 0.12);
+    }
+
+    return { vx, vy };
+  }
+
+  function getConnectedUserNodeIds(startId) {
+    const ids = new Set();
+    const queue = [startId];
+
+    while (queue.length) {
+      const id = queue.shift();
+      if (ids.has(id)) continue;
+
+      const node = getNodeById(id);
+      if (!node?.userCreated) continue;
+
+      ids.add(id);
+
+      for (const link of userLinks) {
+        let other = null;
+        if (link.fromId === id) other = link.toId;
+        else if (link.toId === id) other = link.fromId;
+        if (other !== null && !ids.has(other)) queue.push(other);
+      }
+    }
+
+    return [...ids];
+  }
+
+  function removeFloatingShapesForNodes(nodeIds) {
+    floatingShapes = floatingShapes.filter(
+      (shape) => !shape.nodeIds.some((id) => nodeIds.includes(id))
+    );
+  }
+
+  function findFloatingShapeByNode(nodeId) {
+    return floatingShapes.find((shape) => shape.nodeIds.includes(nodeId));
+  }
+
+  function isNodeFloating(nodeId) {
+    return Boolean(findFloatingShapeByNode(nodeId));
+  }
+
+  function applyFling(hit, vx, vy) {
+    if (Math.hypot(vx, vy) < 0.15) return false;
+    if (!hit.userCreated) return false;
+
+    const ids = getConnectedUserNodeIds(hit.id);
+    if (!ids.length) return false;
+
+    removeFloatingShapesForNodes(ids);
+
+    floatingShapes.push({
+      id: nextShapeId++,
+      nodeIds: ids,
+      vx,
+      vy,
     });
-    
-    // GitHub repository loading
-    loadReposBtn.addEventListener('click', loadRepositories);
-    githubInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            loadRepositories();
+
+    for (const id of ids) {
+      const node = getNodeById(id);
+      if (!node) continue;
+      node.vx = 0;
+      node.vy = 0;
+      node.pinned = false;
+    }
+
+    endChain();
+    return true;
+  }
+
+  function tickFloatingShapes() {
+    const pad = 24;
+    const friction = 0.993;
+
+    floatingShapes = floatingShapes.filter((shape) =>
+      shape.nodeIds.every((id) => getNodeById(id))
+    );
+
+    for (const shape of floatingShapes) {
+      const isDragging =
+        draggingNode && shape.nodeIds.includes(draggingNode.id);
+      if (isDragging) continue;
+
+      const speed = Math.hypot(shape.vx, shape.vy);
+      if (speed < 0.03) {
+        shape.vx = 0;
+        shape.vy = 0;
+        continue;
+      }
+
+      const members = shape.nodeIds
+        .map((id) => getNodeById(id))
+        .filter(Boolean);
+      if (!members.length) continue;
+
+      for (const node of members) {
+        node.x += shape.vx;
+        node.y += shape.vy;
+      }
+
+      shape.vx *= friction;
+      shape.vy *= friction;
+
+      let bounceX = false;
+      let bounceY = false;
+      for (const node of members) {
+        if (node.x < pad) {
+          node.x = pad;
+          bounceX = true;
         }
+        if (node.x > width - pad) {
+          node.x = width - pad;
+          bounceX = true;
+        }
+        if (node.y < pad) {
+          node.y = pad;
+          bounceY = true;
+        }
+        if (node.y > height - pad) {
+          node.y = height - pad;
+          bounceY = true;
+        }
+      }
+      if (bounceX) shape.vx *= -0.82;
+      if (bounceY) shape.vy *= -0.82;
+    }
+  }
+
+  function syncNodes() {
+    nodes = [...ambientNodes, ...userNodes];
+  }
+
+  function nodeCount() {
+    if (prefersReducedMotion) return 28;
+    if (width < 640) return 32;
+    if (width < 1024) return 44;
+    return 58;
+  }
+
+  function connectDistance() {
+    return width < 640 ? 110 : 150;
+  }
+
+  function makeAmbientNode() {
+    return {
+      id: nextNodeId++,
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * (prefersReducedMotion ? 0 : 0.35),
+      vy: (Math.random() - 0.5) * (prefersReducedMotion ? 0 : 0.35),
+      r: Math.random() * 1.2 + 1,
+      pinned: false,
+      userCreated: false,
+    };
+  }
+
+  function makeUserNode(x, y) {
+    return {
+      id: nextNodeId++,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      r: 4,
+      pinned: true,
+      userCreated: true,
+    };
+  }
+
+  function createAmbientNodes() {
+    const count = nodeCount();
+    return Array.from({ length: count }, makeAmbientNode);
+  }
+
+  function getNodeById(id) {
+    return nodes.find((n) => n.id === id);
+  }
+
+  function findNodeAt(x, y) {
+    let found = null;
+    let best = 999;
+
+    const search = (list, padding, extraRadius = 0) => {
+      for (const node of list) {
+        const dx = x - node.x;
+        const dy = y - node.y;
+        const dist = Math.hypot(dx, dy);
+        const hit = padding + node.r + extraRadius;
+        if (dist < hit && dist < best) {
+          best = dist;
+          found = node;
+        }
+      }
+    };
+
+    search(userNodes, 14, 4);
+    if (!found) search(ambientNodes, 6, 0);
+    return found;
+  }
+
+  function addUserLink(fromId, toId) {
+    if (fromId === toId) return;
+    const exists = userLinks.some(
+      (l) =>
+        (l.fromId === fromId && l.toId === toId) ||
+        (l.fromId === toId && l.toId === fromId)
+    );
+    if (!exists) userLinks.push({ fromId, toId });
+  }
+
+  function clearUserArt() {
+    userNodes = [];
+    userLinks = [];
+    floatingShapes = [];
+    selectedId = null;
+    linkPreview = null;
+    draggingNode = null;
+    flingTarget = null;
+    shapeDrag = null;
+    syncNodes();
+  }
+
+  function setCanvasSize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const prevW = width;
+    const prevH = height;
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    if (prevW && prevH) {
+      const sx = width / prevW;
+      const sy = height / prevH;
+      for (const node of [...ambientNodes, ...userNodes]) {
+        node.x *= sx;
+        node.y *= sy;
+      }
+    }
+  }
+
+  function drawLink(x1, y1, x2, y2, color, alpha, lineWidth = 1) {
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+
+  function drawFrame() {
+    ctx.clearRect(0, 0, width, height);
+
+    const maxDist = connectDistance();
+    const maxDistSq = maxDist * maxDist;
+    const sketching = sketchMode || shiftHeld;
+
+    for (let i = 0; i < nodes.length; i += 1) {
+      for (let j = i + 1; j < nodes.length; j += 1) {
+        const a = nodes[i];
+        const b = nodes[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const distSq = dx * dx + dy * dy;
+
+        if (isNodeFloating(a.id) || isNodeFloating(b.id)) continue;
+        if (a.userCreated && b.userCreated) continue;
+
+        if (distSq < maxDistSq) {
+          const t = 1 - Math.sqrt(distSq) / maxDist;
+          drawLink(a.x, a.y, b.x, b.y, palette.line, t * 0.45);
+        }
+      }
+    }
+
+    for (const link of userLinks) {
+      const a = getNodeById(link.fromId);
+      const b = getNodeById(link.toId);
+      if (a && b) {
+        const onChain =
+          selectedId !== null &&
+          (link.fromId === selectedId || link.toId === selectedId);
+        drawLink(
+          a.x,
+          a.y,
+          b.x,
+          b.y,
+          onChain ? palette.lineChain : palette.lineUser,
+          onChain ? 0.95 : 0.85,
+          onChain ? 2 : 1.5
+        );
+      }
+    }
+
+    if (linkPreview) {
+      const from = getNodeById(linkPreview.fromId);
+      if (from) {
+        drawLink(from.x, from.y, linkPreview.x, linkPreview.y, palette.preview, 0.6, 1);
+      }
+    }
+
+    if (mouse.active && !prefersReducedMotion && !sketching) {
+      const reach = maxDist * 1.15;
+      const reachSq = reach * reach;
+
+      for (const node of nodes) {
+        const dx = node.x - mouse.x;
+        const dy = node.y - mouse.y;
+        const distSq = dx * dx + dy * dy;
+
+        if (distSq < reachSq) {
+          const t = 1 - Math.sqrt(distSq) / reach;
+          drawLink(node.x, node.y, mouse.x, mouse.y, palette.lineBright, t * 0.7);
+        }
+      }
+    }
+
+    ctx.globalAlpha = 1;
+    for (const node of nodes) {
+      const isSelected = node.id === selectedId;
+      const isDragging = node === draggingNode;
+      const isChainHead = isSelected && node.userCreated;
+
+      if (isSelected || isDragging) {
+        ctx.strokeStyle = isChainHead ? palette.lineChain : palette.selected;
+        ctx.lineWidth = isChainHead ? 2.5 : 2;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.r + (isChainHead ? 8 : 6), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = node.userCreated ? palette.nodeUser : palette.node;
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (mouse.active && !isCoarsePointer && !sketching) {
+      ctx.fillStyle = 'rgba(91, 154, 255, 0.9)';
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
+  function tick() {
+    if (!prefersReducedMotion) {
+      for (const node of ambientNodes) {
+        if (node.pinned || draggingNode === node) continue;
+
+        node.x += node.vx;
+        node.y += node.vy;
+
+        if (node.x <= 0 || node.x >= width) node.vx *= -1;
+        if (node.y <= 0 || node.y >= height) node.vy *= -1;
+
+        node.x = Math.max(0, Math.min(width, node.x));
+        node.y = Math.max(0, Math.min(height, node.y));
+      }
+    }
+
+    if (floatingShapes.length) {
+      tickFloatingShapes();
+    }
+
+    drawFrame();
+
+    if (isVisible) {
+      animationId = requestAnimationFrame(tick);
+    } else {
+      animationId = null;
+    }
+  }
+
+  function start() {
+    if (animationId) cancelAnimationFrame(animationId);
+    setCanvasSize();
+
+    if (!ambientNodes.length) {
+      ambientNodes = createAmbientNodes();
+      syncNodes();
+    }
+
+    tick();
+  }
+
+  function pointerPos(e) {
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  function isInteractiveTarget(el) {
+    return Boolean(el?.closest(INTERACTIVE));
+  }
+
+  function onPointerDown(e) {
+    if (!isSketching(e)) return;
+    if (isInteractiveTarget(e.target) && e.target !== canvas) return;
+
+    shiftHeld = e.shiftKey || shiftHeld;
+    dragMoved = false;
+    flingSamples = [];
+
+    const { x, y } = pointerPos(e);
+    pointerDownX = x;
+    pointerDownY = y;
+    recordFlingSample(x, y);
+
+    if (isDoubleClick(x, y) && selectedId !== null) {
+      endChain();
+      e.preventDefault();
+      return;
+    }
+
+    const hit = findNodeAt(x, y);
+
+    if (hit) {
+      const hitFloating = isNodeFloating(hit.id);
+
+      if (!hitFloating) {
+        if (selectedId !== null && selectedId !== hit.id) {
+          addUserLink(selectedId, hit.id);
+        }
+        selectedId = hit.id;
+        linkPreview = { fromId: hit.id, x, y };
+      } else {
+        endChain();
+        linkPreview = null;
+      }
+
+      draggingNode = hit;
+      flingTarget = hit;
+      hit.pinned = true;
+      hit.vx = 0;
+      hit.vy = 0;
+      pointerId = e.pointerId;
+
+      if (hit.userCreated) {
+        const shapeIds = getConnectedUserNodeIds(hit.id);
+        const floating = findFloatingShapeByNode(hit.id);
+        if (floating) {
+          floating.vx = 0;
+          floating.vy = 0;
+        }
+        shapeDrag = {
+          nodeIds: shapeIds,
+          startX: x,
+          startY: y,
+          origins: new Map(
+            shapeIds.map((id) => {
+              const n = getNodeById(id);
+              return [id, { x: n.x, y: n.y }];
+            })
+          ),
+        };
+      }
+
+      if (sketchMode && canvas.setPointerCapture) {
+        try {
+          canvas.setPointerCapture(e.pointerId);
+        } catch {
+          /* ignore */
+        }
+      }
+      e.preventDefault();
+      return;
+    }
+
+    if (userNodes.length >= MAX_USER_NODES) return;
+
+    const node = makeUserNode(x, y);
+    if (selectedId !== null) {
+      addUserLink(selectedId, node.id);
+    }
+    userNodes.push(node);
+    syncNodes();
+    selectedId = node.id;
+    linkPreview = { fromId: node.id, x, y };
+    e.preventDefault();
+  }
+
+  function onPointerMove(e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
+
+    if (draggingNode) {
+      recordFlingSample(mouse.x, mouse.y);
+      const dist = Math.hypot(mouse.x - pointerDownX, mouse.y - pointerDownY);
+      if (dist > DRAG_THRESHOLD) dragMoved = true;
+
+      if (shapeDrag) {
+        const dx = mouse.x - shapeDrag.startX;
+        const dy = mouse.y - shapeDrag.startY;
+        for (const [id, origin] of shapeDrag.origins) {
+          const n = getNodeById(id);
+          if (!n) continue;
+          n.x = origin.x + dx;
+          n.y = origin.y + dy;
+        }
+        if (linkPreview) {
+          linkPreview.x = mouse.x;
+          linkPreview.y = mouse.y;
+        }
+      } else {
+        draggingNode.x = mouse.x;
+        draggingNode.y = mouse.y;
+        if (linkPreview) {
+          linkPreview.x = mouse.x;
+          linkPreview.y = mouse.y;
+        }
+      }
+    } else if (selectedId && isSketching(e)) {
+      linkPreview = { fromId: selectedId, x: mouse.x, y: mouse.y };
+    }
+  }
+
+  function onPointerUp(e) {
+    const releaseTarget = flingTarget || draggingNode;
+    if (releaseTarget) {
+      const dragDx = e.clientX - pointerDownX;
+      const dragDy = e.clientY - pointerDownY;
+
+      let flung = false;
+      if (
+        releaseTarget.userCreated &&
+        (dragMoved || Math.hypot(dragDx, dragDy) > 4)
+      ) {
+        const { vx, vy } = resolveFlingVelocity(flingSamples, dragDx, dragDy);
+        flung = applyFling(releaseTarget, vx, vy);
+      }
+
+      if (!dragMoved && !flung && releaseTarget.id === selectedId) {
+        linkPreview = { fromId: selectedId, x: e.clientX, y: e.clientY };
+      }
+
+      if (releaseTarget.userCreated) {
+        const ids = getConnectedUserNodeIds(releaseTarget.id);
+        for (const id of ids) {
+          const node = getNodeById(id);
+          if (node) node.pinned = false;
+        }
+      }
+
+      draggingNode = null;
+      flingTarget = null;
+      shapeDrag = null;
+      pointerId = null;
+      flingSamples = [];
+    }
+
+    if (canvas.releasePointerCapture) {
+      try {
+        canvas.releasePointerCapture(e.pointerId);
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  function onKeyDown(e) {
+    if (e.key === 'Shift') {
+      shiftHeld = true;
+      if (playHint && !sketchMode) {
+        playHint.hidden = false;
+        playHint.classList.add('is-visible');
+        playHint.textContent =
+          'Hold Shift — click to place dots, click two dots to connect, drag to move. Esc to clear.';
+      }
+    }
+    if (e.key === 'c' || e.key === 'C') {
+      if (isSketching()) endChain();
+    }
+    if (e.key === 'Escape') {
+      if (sketchMode) setSketchMode(false);
+      clearUserArt();
+    }
+  }
+
+  function onKeyUp(e) {
+    if (e.key === 'Shift') {
+      shiftHeld = false;
+      if (!sketchMode) {
+        linkPreview = null;
+        selectedId = null;
+        draggingNode = null;
+        if (playHint) {
+          playHint.classList.remove('is-visible');
+          playHint.hidden = true;
+        }
+      }
+    }
+  }
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(start, 150);
+  });
+
+  document.addEventListener('mousemove', onPointerMove);
+  document.addEventListener('mouseleave', () => {
+    mouse.active = false;
+    if (!sketchMode) linkPreview = null;
+  });
+
+  document.addEventListener(
+    'pointerdown',
+    (e) => {
+      if (sketchMode) {
+        if (isInteractiveTarget(e.target)) return;
+        onPointerDown(e);
+        return;
+      }
+      if (!e.shiftKey) return;
+      if (isInteractiveTarget(e.target)) return;
+      onPointerDown(e);
+    },
+    true
+  );
+
+  document.addEventListener('pointermove', onPointerMove);
+  document.addEventListener('pointerup', onPointerUp);
+  document.addEventListener('pointercancel', onPointerUp);
+
+  document.addEventListener('keydown', onKeyDown);
+  document.addEventListener('keyup', onKeyUp);
+
+  if (sketchToggle) {
+    sketchToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setSketchMode(!sketchMode);
     });
-    
-    // Filtering and sorting
-    languageFilter.addEventListener('change', filterRepositories);
-    sortRepos.addEventListener('change', sortRepositories);
-    
-    // View toggle
-    gridViewBtn.addEventListener('click', () => toggleView('grid'));
-    listViewBtn.addEventListener('click', () => toggleView('list'));
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    isVisible = !document.hidden;
+    if (isVisible && !animationId) {
+      animationId = requestAnimationFrame(tick);
+    }
+    if (!isVisible && animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+  });
+
+  start();
 }
 
-// Mobile Navigation
-function toggleMobileNav() {
-    hamburger.classList.toggle('active');
-    navMenu.classList.toggle('active');
+function initCustomCursor() {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+  if (!cursorDot || !cursorRing || prefersReducedMotion || isTouch) {
+    return;
+  }
+
+  document.body.classList.add('cursor-enabled');
+
+  let mouseX = 0;
+  let mouseY = 0;
+  let ringX = 0;
+  let ringY = 0;
+  const lerp = 0.15;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursorDot.style.left = `${mouseX}px`;
+    cursorDot.style.top = `${mouseY}px`;
+  });
+
+  const hoverTargets =
+    'a, button, .btn, .project-link, .view-btn, .contact-item, .hamburger, .back-to-top, .bg-sketch-toggle, input, textarea, select, label';
+  document.querySelectorAll(hoverTargets).forEach((el) => {
+    el.addEventListener('mouseenter', () => cursorRing.classList.add('is-hover'));
+    el.addEventListener('mouseleave', () => cursorRing.classList.remove('is-hover'));
+  });
+
+  document.addEventListener('mouseover', (e) => {
+    const target = e.target.closest(hoverTargets);
+    if (target) cursorRing.classList.add('is-hover');
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    const related = e.relatedTarget;
+    if (!related || !related.closest(hoverTargets)) {
+      cursorRing.classList.remove('is-hover');
+    }
+  });
+
+  function animateRing() {
+    ringX += (mouseX - ringX) * lerp;
+    ringY += (mouseY - ringY) * lerp;
+    cursorRing.style.left = `${ringX}px`;
+    cursorRing.style.top = `${ringY}px`;
+    requestAnimationFrame(animateRing);
+  }
+
+  animateRing();
 }
 
-// Close mobile nav when clicking on links
-document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', () => {
+function initNavObserver() {
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  if (!sections.length) return;
+
+  const navObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach((link) => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+          });
+        }
+      });
+    },
+    {
+      rootMargin: '-40% 0px -55% 0px',
+      threshold: 0,
+    }
+  );
+
+  sections.forEach((section) => navObserver.observe(section));
+}
+
+function initBackToTop() {
+  if (!backToTopBtn) return;
+
+  const toggleVisibility = () => {
+    backToTopBtn.classList.toggle('is-visible', window.scrollY > 400);
+  };
+
+  toggleVisibility();
+  window.addEventListener('scroll', toggleVisibility, { passive: true });
+
+  backToTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+function initScrollReveal() {
+  const revealObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+  );
+
+  document.querySelectorAll('.section-reveal, .reveal').forEach((el) => {
+    revealObserver.observe(el);
+  });
+
+  document.querySelectorAll('.reveal-group').forEach((group) => {
+    revealObserver.observe(group);
+  });
+}
+
+function initializeEventListeners() {
+  hamburger.addEventListener('click', toggleMobileNav);
+
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      if (href === '#') return;
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         hamburger.classList.remove('active');
         navMenu.classList.remove('active');
+      }
     });
-});
+  });
 
-// GitHub API Functions
+  languageFilter.addEventListener('change', filterRepositories);
+  sortRepos.addEventListener('change', sortRepositories);
+  gridViewBtn.addEventListener('click', () => toggleView('grid'));
+  listViewBtn.addEventListener('click', () => toggleView('list'));
+
+  if (retryReposBtn) {
+    retryReposBtn.addEventListener('click', loadRepositories);
+  }
+
+  if (contactForm) {
+    contactForm.addEventListener('submit', handleContactSubmit);
+  }
+}
+
+function toggleMobileNav() {
+  hamburger.classList.toggle('active');
+  navMenu.classList.toggle('active');
+}
+
+function githubHeaders() {
+  return {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+}
+
+async function fetchGitHub(path) {
+  const response = await fetch(`https://api.github.com${path}`, {
+    headers: githubHeaders(),
+  });
+
+  if (!response.ok) {
+    const err = new Error(`GitHub API error: ${response.status}`);
+    err.status = response.status;
+    if (response.status === 403) {
+      err.message =
+        'GitHub rate limit reached. Please try again in a few minutes or visit my profile directly.';
+    } else if (response.status === 404) {
+      err.message = 'GitHub user not found. Please check back later.';
+    }
+    throw err;
+  }
+
+  return response.json();
+}
+
 async function loadRepositories() {
-    const username = githubInput.value.trim();
-    
-    if (!username) {
-        alert('Please enter a GitHub username');
-        return;
-    }
-    
-    currentUser = username;
-    localStorage.setItem('github-username', username);
-    
-    showLoading(true);
-    hideError();
-    
-    try {
-        // Fetch user data and repositories
-        const [userData, reposData] = await Promise.all([
-            fetch(`https://api.github.com/users/${username}`),
-            fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`)
-        ]);
-        
-        if (!userData.ok || !reposData.ok) {
-            throw new Error('User not found or API limit reached');
-        }
-        
-        const user = await userData.json();
-        const repos = await reposData.json();
-        
-        // Filter out forks and empty repositories
-        repositories = repos.filter(repo => 
-            !repo.fork && 
-            repo.size > 0 && 
-            !repo.archived
-        );
-        
-        // Update user info
-        updateUserInfo(user, repositories);
-        
-        // Get language data for each repository
-        await enrichRepositoriesWithLanguages();
-        
-        // Display repositories
-        filteredRepos = [...repositories];
-        displayRepositories();
-        updateLanguageFilter();
-        
-    } catch (error) {
-        console.error('Error loading repositories:', error);
-        showError('Unable to load repositories. Please check the username and try again.');
-    } finally {
-        showLoading(false);
-    }
-}
+  showLoading(true);
+  hideError();
+  projectsGrid.innerHTML = '';
 
-async function enrichRepositoriesWithLanguages() {
-    const languagePromises = repositories.map(async (repo) => {
-        try {
-            const response = await fetch(repo.languages_url);
-            if (response.ok) {
-                const languages = await response.json();
-                repo.languages = languages;
-                repo.primaryLanguage = Object.keys(languages)[0] || null;
-            }
-        } catch (error) {
-            console.error(`Error fetching languages for ${repo.name}:`, error);
-            repo.languages = {};
-            repo.primaryLanguage = repo.language;
-        }
-    });
-    
-    await Promise.all(languagePromises);
-}
+  try {
+    const repos = await fetchGitHub(
+      `/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated&type=owner`
+    );
 
-function updateUserInfo(user, repos) {
-    // Update GitHub link
-    const githubLink = document.getElementById('github-link');
-    githubLink.textContent = `github.com/${user.login}`;
-    githubLink.onclick = () => window.open(user.html_url, '_blank');
-    githubLink.style.cursor = 'pointer';
-    githubLink.style.color = '#667eea';
-}
+    repositories = repos.filter((repo) => !repo.fork && !repo.archived);
 
-function displayRepositories() {
-    if (filteredRepos.length === 0) {
-        projectsGrid.innerHTML = '<div class="no-repos"><p>No repositories found matching the current filters.</p></div>';
-        return;
-    }
-    
-    projectsGrid.innerHTML = filteredRepos.map(repo => createRepositoryCard(repo)).join('');
-}
-
-function createRepositoryCard(repo) {
-    const updatedDate = new Date(repo.updated_at).toLocaleDateString();
-    const createdDate = new Date(repo.created_at).toLocaleDateString();
-    
-    // Enhanced demo link detection
-    let hasDemo = false;
-    let demoUrl = null;
-    let demoText = 'Live Demo';
-    
-    // Check homepage URL first
-    if (repo.homepage && repo.homepage.trim() !== '') {
-        // Special handling for TechForum repository with incorrect homepage
-        if (repo.name === 'TechForum---Advanced-Developer-Q-A-Platform' && repo.homepage.includes('Project4')) {
-            hasDemo = true;
-            demoUrl = `https://${repo.owner.login}.github.io/${repo.name}`;
-            demoText = 'GitHub Pages';
-        } else {
-            hasDemo = true;
-            demoUrl = repo.homepage;
-            
-            // Customize demo text based on platform
-            const url = repo.homepage.toLowerCase();
-            if (url.includes('github.io')) {
-                demoText = 'GitHub Pages';
-            } else if (url.includes('netlify')) {
-                demoText = 'Netlify Demo';
-            } else if (url.includes('vercel')) {
-                demoText = 'Vercel Demo';
-            } else if (url.includes('heroku')) {
-                demoText = 'Heroku Demo';
-            } else if (url.includes('replit')) {
-                demoText = 'Replit Demo';
-            } else if (url.includes('codepen')) {
-                demoText = 'CodePen';
-            } else if (url.includes('codesandbox')) {
-                demoText = 'CodeSandbox';
-            }
-        }
-    }
-    
-    // Fallback: Check if GitHub Pages might be available
-    if (!hasDemo && repo.name.includes('github.io')) {
-        hasDemo = true;
-        demoUrl = `https://${repo.owner.login}.github.io/${repo.name}`;
-        demoText = 'GitHub Pages';
-    }
-    
-    // Additional fallback: Try standard GitHub Pages URL for web projects
-    if (!hasDemo && (repo.language === 'HTML' || repo.language === 'JavaScript' || repo.language === 'CSS')) {
-        // Check if this might be a GitHub Pages site
-        // Encode the repository name to handle special characters
-        const encodedRepoName = encodeURIComponent(repo.name);
-        const potentialUrl = `https://${repo.owner.login}.github.io/${encodedRepoName}`;
-        demoUrl = potentialUrl;
-        demoText = 'GitHub Pages';
-        hasDemo = true; // We'll show the button, user can click to test
-    }
-    
-    // Get all languages
-    let languagesDisplay = '';
-    if (repo.languages && Object.keys(repo.languages).length > 0) {
-        const languageItems = Object.entries(repo.languages)
-            .sort(([,a], [,b]) => b - a) // Sort by bytes descending
-            .slice(0, 5) // Show top 5 languages
-            .map(([language, bytes]) => {
-                const color = languageColors[language] || '#858585';
-                return `
-                    <div class="language-item">
-                        <div class="language-color" style="background-color: ${color}"></div>
-                        <span class="language-name">${language}</span>
-                    </div>
-                `;
-            }).join('');
-        
-        languagesDisplay = `<div class="project-languages">${languageItems}</div>`;
-    } else if (repo.language) {
-        // Fallback to primary language if languages API fails
-        const languageColor = languageColors[repo.language] || '#858585';
-        languagesDisplay = `
-            <div class="project-languages">
-                <div class="language-item">
-                    <div class="language-color" style="background-color: ${languageColor}"></div>
-                    <span class="language-name">${repo.language}</span>
-                </div>
-            </div>
-        `;
-    }
-    
-    // Format topics
-    const topics = repo.topics && repo.topics.length > 0 
-        ? repo.topics.slice(0, 5).map(topic => `<span class="topic-tag">${topic}</span>`).join('')
-        : '';
-    
-    return `
-        <div class="project-card" data-language="${repo.language || ''}" data-stars="${repo.stargazers_count}" data-updated="${repo.updated_at}" data-created="${repo.created_at}" data-name="${repo.name.toLowerCase()}">
-            <div class="project-header">
-                <h3 class="project-title">${repo.name}</h3>
-                ${repo.private ? '<span class="private-badge">Private</span>' : ''}
-            </div>
-            
-            ${languagesDisplay}
-            
-            <div class="project-meta">
-                ${repo.stargazers_count > 0 ? `
-                    <div class="meta-item">
-                        <i class="fas fa-star"></i>
-                        <span>${repo.stargazers_count}</span>
-                    </div>
-                ` : ''}
-                
-                ${repo.forks_count > 0 ? `
-                    <div class="meta-item">
-                        <i class="fas fa-code-branch"></i>
-                        <span>${repo.forks_count}</span>
-                    </div>
-                ` : ''}
-            </div>
-            
-            ${topics ? `<div class="project-topics">${topics}</div>` : ''}
-            
-            <div class="project-links">
-                <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="project-link">
-                    <i class="fab fa-github"></i>
-                    View Code
-                </a>
-                
-                <a href="${demoUrl || repo.html_url}" target="_blank" rel="noopener noreferrer" class="project-link demo ${!hasDemo ? 'disabled-demo' : ''}">
-                    <i class="fas fa-external-link-alt"></i>
-                    ${hasDemo ? demoText : 'No Live Demo'}
-                </a>
-            </div>
-        </div>
-    `;
+    filteredRepos = [...repositories];
+    updateLanguageFilter();
+    sortRepositories();
+  } catch (error) {
+    console.error('Error loading repositories:', error);
+    const message =
+      error.message ||
+      "We couldn't load GitHub repositories right now. Please try again in a few minutes, or visit my profile directly.";
+    showError(message);
+  } finally {
+    showLoading(false);
+  }
 }
 
 function updateLanguageFilter() {
-    const languages = new Set();
-    repositories.forEach(repo => {
-        if (repo.language) languages.add(repo.language);
-    });
-    
-    const sortedLanguages = Array.from(languages).sort();
-    
-    languageFilter.innerHTML = '<option value="">All Languages</option>' +
-        sortedLanguages.map(lang => `<option value="${lang}">${lang}</option>`).join('');
+  const languages = new Set();
+  repositories.forEach((repo) => {
+    if (repo.language) languages.add(repo.language);
+  });
+
+  const sortedLanguages = Array.from(languages).sort();
+  languageFilter.innerHTML =
+    '<option value="">All Languages</option>' +
+    sortedLanguages.map((lang) => `<option value="${lang}">${lang}</option>`).join('');
 }
 
 function filterRepositories() {
-    const selectedLanguage = languageFilter.value;
-    
-    if (selectedLanguage === '') {
-        filteredRepos = [...repositories];
-    } else {
-        filteredRepos = repositories.filter(repo => repo.language === selectedLanguage);
-    }
-    
-    sortRepositories();
+  const selectedLanguage = languageFilter.value;
+  filteredRepos =
+    selectedLanguage === ''
+      ? [...repositories]
+      : repositories.filter((repo) => repo.language === selectedLanguage);
+  sortRepositories();
 }
 
 function sortRepositories() {
-    const sortBy = sortRepos.value;
-    
-    filteredRepos.sort((a, b) => {
-        switch (sortBy) {
-            case 'stars':
-                return b.stargazers_count - a.stargazers_count;
-            case 'name':
-                return a.name.localeCompare(b.name);
-            case 'created':
-                return new Date(b.created_at) - new Date(a.created_at);
-            case 'updated':
-            default:
-                return new Date(b.updated_at) - new Date(a.updated_at);
+  const sortBy = sortRepos.value;
+
+  filteredRepos.sort((a, b) => {
+    switch (sortBy) {
+      case 'stars':
+        return b.stargazers_count - a.stargazers_count;
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'created':
+        return new Date(b.created_at) - new Date(a.created_at);
+      case 'updated':
+      default:
+        return new Date(b.updated_at) - new Date(a.updated_at);
+    }
+  });
+
+  displayRepositories();
+}
+
+function displayRepositories() {
+  if (filteredRepos.length === 0) {
+    projectsGrid.innerHTML =
+      '<div class="no-repos"><p>No public repositories match the current filters.</p></div>';
+    return;
+  }
+
+  projectsGrid.classList.add('reveal-group');
+  projectsGrid.innerHTML = filteredRepos.map(createRepositoryCard).join('');
+  observeRepoCards();
+}
+
+function createRepositoryCard(repo) {
+  const description = repo.description
+    ? escapeHtml(repo.description)
+    : '<span class="project-description--empty">No description provided.</span>';
+
+  const language = repo.language;
+  const languageColor = languageColors[language] || '#858585';
+  const languageHtml = language
+    ? `<div class="project-languages">
+        <div class="language-item">
+          <span class="language-color" style="background-color: ${languageColor}"></span>
+          <span class="language-name">${escapeHtml(language)}</span>
+        </div>
+      </div>`
+    : '';
+
+  const stars = repo.stargazers_count ?? 0;
+
+  return `
+    <article class="project-card card reveal-child" data-language="${escapeHtml(language || '')}">
+      <div class="project-header">
+        <h3 class="project-title">
+          <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer">${escapeHtml(repo.name)}</a>
+        </h3>
+      </div>
+      <p class="project-description">${description}</p>
+      ${languageHtml}
+      <div class="project-meta">
+        <div class="meta-item" title="Stars">
+          <i class="fas fa-star" aria-hidden="true"></i>
+          <span>${stars}</span>
+        </div>
+      </div>
+      <div class="project-links">
+        <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="project-link">
+          <i class="fab fa-github" aria-hidden="true"></i>
+          View on GitHub
+        </a>
+      </div>
+    </article>
+  `;
+}
+
+let repoGridObserver;
+
+function observeRepoCards() {
+  if (repoGridObserver) repoGridObserver.disconnect();
+
+  projectsGrid.classList.add('reveal-group');
+
+  const cards = projectsGrid.querySelectorAll('.reveal-child');
+  cards.forEach((card, index) => {
+    card.style.transitionDelay = `${(index % 6) * 0.1}s`;
+  });
+
+  if (projectsGrid.classList.contains('is-visible')) return;
+
+  repoGridObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          repoGridObserver.unobserve(entry.target);
         }
-    });
-    
-    displayRepositories();
+      });
+    },
+    { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
+  );
+
+  repoGridObserver.observe(projectsGrid);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 function toggleView(view) {
-    if (view === 'grid') {
-        projectsGrid.classList.remove('list-view');
-        gridViewBtn.classList.add('active');
-        listViewBtn.classList.remove('active');
-    } else {
-        projectsGrid.classList.add('list-view');
-        listViewBtn.classList.add('active');
-        gridViewBtn.classList.remove('active');
-    }
+  if (view === 'grid') {
+    projectsGrid.classList.remove('list-view');
+    gridViewBtn.classList.add('active');
+    listViewBtn.classList.remove('active');
+  } else {
+    projectsGrid.classList.add('list-view');
+    listViewBtn.classList.add('active');
+    gridViewBtn.classList.remove('active');
+  }
 }
 
-// Utility functions
 function showLoading(show) {
-    loading.classList.toggle('hidden', !show);
+  loading.classList.toggle('hidden', !show);
 }
 
 function hideError() {
-    errorMessage.classList.add('hidden');
+  errorMessage.classList.add('hidden');
 }
 
 function showError(message) {
-    errorMessage.querySelector('p').textContent = message;
-    errorMessage.classList.remove('hidden');
+  const paragraph = errorMessage.querySelector('p');
+  if (paragraph) paragraph.textContent = message;
+  errorMessage.classList.remove('hidden');
 }
 
-// Scroll animations
-function observeElements() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    });
-    
-    // Observe project cards
-    document.querySelectorAll('.project-card').forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(card);
-    });
-}
+async function handleContactSubmit(e) {
+  e.preventDefault();
+  const submitBtn = contactForm.querySelector('.btn-submit');
+  const originalText = submitBtn.textContent;
 
-// Call observe function when repositories are loaded
-const originalDisplayRepositories = displayRepositories;
-displayRepositories = function() {
-    originalDisplayRepositories.call(this);
-    setTimeout(observeElements, 100);
-};
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending...';
+  formStatus.classList.add('hidden');
 
-// Active navigation highlight
-window.addEventListener('scroll', () => {
-    const sections = document.querySelectorAll('section');
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    let current = '';
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop - 100;
-        const sectionHeight = section.clientHeight;
-        
-        if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
-            current = section.getAttribute('id');
-        }
+  try {
+    const response = await fetch(contactForm.action, {
+      method: 'POST',
+      body: new FormData(contactForm),
+      headers: { Accept: 'application/json' },
     });
-    
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === `#${current}`) {
-            link.classList.add('active');
-        }
-    });
-});
 
-// Add some sample placeholder text update
-document.addEventListener('DOMContentLoaded', () => {
-    // You can customize these values
-    const heroTitle = document.querySelector('.hero-title .highlight');
-    const contactItems = document.querySelectorAll('.contact-item span');
-    
-    // Update contact information placeholders
-    if (contactItems.length >= 2) {
-        contactItems[0].textContent = 'david.foy89@gmail.com';
-        contactItems[1].textContent = 'github.com/david-foy89';
+    if (response.ok) {
+      formStatus.textContent = 'Thanks! Your message was sent successfully.';
+      formStatus.className = 'form-status success';
+      contactForm.reset();
+    } else {
+      throw new Error('Form submission failed');
     }
-});
+  } catch {
+    formStatus.textContent =
+      'Something went wrong. Please email me directly at david.foy89@gmail.com.';
+    formStatus.className = 'form-status error';
+  } finally {
+    formStatus.classList.remove('hidden');
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+}
+
+console.log(
+  '%c👋 Hey, you found the console!',
+  'color: #1E3A5F; font-size: 16px; font-weight: bold;'
+);
+console.log(
+  "%cI'm David Foy — let's build something together.",
+  'color: #9090aa; font-size: 13px;'
+);
+console.log(
+  '%c📧 [email protected] | 🔗 github.com/david-foy89',
+  'color: #3D6B9E; font-size: 13px;'
+);

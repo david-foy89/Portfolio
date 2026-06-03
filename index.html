@@ -3,19 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>David Foy - Portfolio</title>
+    <meta
+      name="description"
+      content="David Foy — Full Stack Developer specializing in JavaScript, React, and Node.js. View my projects and get in touch."
+    />
+    <meta property="og:title" content="David Foy — Full Stack Developer" />
+    <meta
+      property="og:description"
+      content="David Foy — Full Stack Developer specializing in JavaScript, React, and Node.js. View my projects and get in touch."
+    />
+    <meta property="og:image" content="https://davidkfoy.com/og-image.png" />
+    <meta property="og:url" content="https://davidkfoy.com" />
+    <meta property="og:type" content="website" />
+    <link rel="canonical" href="https://davidkfoy.com" />
+    <title>David Foy — Full Stack Developer</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
-    <!-- Navigation -->
+    <a class="skip-link" href="#home">Skip to content</a>
+    <div class="page-bg" aria-hidden="true">
+      <div class="page-bg__mesh"></div>
+      <canvas class="page-bg__canvas" id="bg-canvas"></canvas>
+      <div class="page-bg__grid"></div>
+      <div class="page-bg__glow"></div>
+    </div>
+    <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
     <nav class="navbar">
       <div class="nav-container">
         <div class="nav-logo">
@@ -35,7 +57,7 @@
             <a href="#contact" class="nav-link">Contact</a>
           </li>
         </ul>
-        <div class="hamburger">
+        <div class="hamburger" aria-label="Toggle menu">
           <span class="bar"></span>
           <span class="bar"></span>
           <span class="bar"></span>
@@ -43,150 +65,119 @@
       </div>
     </nav>
 
-    <!-- Hero Section -->
     <section id="home" class="hero">
       <div class="hero-container">
         <div class="hero-content">
-          <h1 class="hero-title">
-            Hi, I'm <span class="highlight">David Foy</span>
-          </h1>
-          <p class="hero-subtitle">
-            Full Stack Developer & Open Source Contributor
+          <p class="hero-eyebrow hero-stagger" style="--stagger: 0ms">
+            <span class="hero-eyebrow__dot" aria-hidden="true"></span>
+            Full Stack Developer
           </p>
-          <p class="hero-description">
-            I create amazing web applications and contribute to open source
-            projects. Check out my latest work below!
+          <div class="hero-title-wrap">
+            <h1 class="hero-title hero-stagger" style="--stagger: 80ms">
+              Hi, I'm <span class="highlight">David Foy</span>
+            </h1>
+          </div>
+          <p class="hero-subheading hero-stagger" style="--stagger: 160ms">
+            I build full stack web apps with JavaScript, React, and Node.js —
+            open to junior developer opportunities and freelance work.
           </p>
-          <div class="hero-buttons">
+          <div class="hero-buttons hero-stagger" style="--stagger: 240ms">
             <a href="#projects" class="btn btn-primary">View My Work</a>
             <a href="#contact" class="btn btn-secondary">Get In Touch</a>
           </div>
         </div>
-        <div class="hero-image">
-          <div class="developer-illustration">
-            <div class="developer-workspace">
-              <div class="monitor">
-                <div class="screen">
-                  <div class="code-editor">
-                    <div class="editor-header">
-                      <div class="editor-tabs">
-                        <span class="tab active">index.js</span>
-                        <span class="tab">style.css</span>
-                      </div>
-                    </div>
-                    <div class="editor-content">
-                      <div class="code-line">
-                        <span class="code-keyword">function</span>
-                        <span class="code-function">buildAmazingApp</span>()
-                      </div>
-                      <div class="code-line">
-                        <span class="code-keyword">const</span>
-                        <span class="code-variable">magic</span> =
-                        <span class="code-string">'happens here'</span>
-                      </div>
-                      <div class="code-line">
-                        <span class="code-keyword">return</span>
-                        <span class="code-variable">success</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="desk-items">
-                <div class="coffee-cup">
-                  <i class="fas fa-coffee"></i>
-                </div>
-                <div class="tech-icons">
-                  <i class="fab fa-js-square"></i>
-                  <i class="fab fa-react"></i>
-                  <i class="fab fa-node-js"></i>
-                  <i class="fab fa-python"></i>
-                </div>
-              </div>
+        <div class="hero-image hero-stagger" style="--stagger: 320ms">
+          <div class="code-snippet-card">
+            <div class="code-snippet-header">
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-filename">routes/health.js</span>
             </div>
+            <pre class="code-snippet-body"><code><span class="code-comment">// Express health check — real pattern from my projects</span>
+<span class="code-keyword">export function</span> <span class="code-function">healthCheck</span>(req, res) {
+  <span class="code-keyword">const</span> payload = {
+    status: <span class="code-string">'ok'</span>,
+    uptime: process.uptime(),
+  };
+  res.status(<span class="code-number">200</span>).json(payload);
+}</code></pre>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="about">
+    <section id="about" class="about section-reveal">
       <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
           <h2 class="section-title">About Me</h2>
           <p class="section-subtitle">
-            Get to know more about my background and skills
+            Full stack developer building real products with modern web tools
           </p>
         </div>
         <div class="about-content">
-          <div class="about-text">
+          <div class="about-text reveal">
             <div class="about-intro">
               <p>
-                Hi there! I'm David Foy, an aspiring developer who discovered my
-                passion for programming and have been dedicated to learning and
-                growing my skills every day. What started as curiosity has
-                transformed into a genuine love for creating digital solutions
-                and building meaningful projects.
+                I'm David Foy — full stack developer, Tennessee-based, always
+                in the middle of building something.
               </p>
               <p>
-                As a newer developer, I'm constantly expanding my knowledge
-                through hands-on projects, online courses, coding challenges,
-                and contributing to open source projects. Every day brings new
-                learning opportunities, and I embrace each challenge as a chance
-                to improve my craft.
+                Coding started as curiosity. Now it's the thing I do when I
+                want to solve a problem, when I want to make something real,
+                and honestly just when I'm bored. I care about the details:
+                clean logic, solid APIs, and interfaces that feel right to use.
+              </p>
+              <p>
+                I work across the full stack with React, TypeScript, Node.js,
+                Express, and MongoDB. I've shipped a full-stack forum with JWT
+                auth and real user flows, and a browser-based tool suite for
+                a game community that people actually use every day.
+              </p>
+              <p>
+                Looking for a role where good work is noticed and fast growth
+                is expected. Let's build something.
               </p>
             </div>
 
             <div class="experience">
-              <h3>What I'm Working On:</h3>
-              <div class="experience-list">
-                <div class="experience-item">
-                  <i class="fas fa-code"></i>
+              <h3>What I'm Working On</h3>
+              <div class="experience-list reveal-group">
+                <div class="experience-item card reveal-child">
+                  <i class="fas fa-layer-group"></i>
                   <div>
-                    <h4>Full-Stack Development</h4>
-                    <p>
-                      Learning to build complete web applications from frontend
-                      to backend, practicing with modern frameworks
-                    </p>
+                    <h4>Full Stack Projects</h4>
+                    <p>Shipping complete apps end-to-end</p>
                   </div>
                 </div>
-                <div class="experience-item">
-                  <i class="fab fa-github"></i>
+                <div class="experience-item card reveal-child">
+                  <i class="fas fa-server"></i>
                   <div>
-                    <h4>Open Source Learning</h4>
-                    <p>
-                      Contributing to community projects and building my own
-                      repositories to practice and share my progress
-                    </p>
+                    <h4>Backend &amp; APIs</h4>
+                    <p>Auth, databases, and REST APIs in production apps</p>
                   </div>
                 </div>
-                <div class="experience-item">
-                  <i class="fas fa-mobile-alt"></i>
+                <div class="experience-item card reveal-child">
+                  <i class="fas fa-palette"></i>
                   <div>
-                    <h4>Responsive Design</h4>
-                    <p>
-                      Studying user experience principles and learning to create
-                      interfaces that work well across all devices
-                    </p>
+                    <h4>Clean UI</h4>
+                    <p>Interfaces that feel good to use</p>
                   </div>
                 </div>
-                <div class="experience-item">
-                  <i class="fas fa-graduation-cap"></i>
+                <div class="experience-item card reveal-child">
+                  <i class="fas fa-chart-line"></i>
                   <div>
-                    <h4>Continuous Learning</h4>
-                    <p>
-                      Taking online courses, tutorials, and coding challenges to
-                      strengthen my programming fundamentals
-                    </p>
+                    <h4>Getting Better Every Day</h4>
+                    <p>Always one project ahead of yesterday</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div class="skills">
-              <h3>Technologies I'm Learning:</h3>
-              <div class="skill-categories">
-                <div class="skill-category">
+              <h3>Tech Stack</h3>
+              <div class="skill-categories reveal-group">
+                <div class="skill-category card reveal-child">
                   <h4>Frontend</h4>
                   <div class="skill-tags">
                     <span class="skill-tag">JavaScript</span>
@@ -196,7 +187,7 @@
                     <span class="skill-tag">Sass</span>
                   </div>
                 </div>
-                <div class="skill-category">
+                <div class="skill-category card reveal-child">
                   <h4>Backend</h4>
                   <div class="skill-tags">
                     <span class="skill-tag">Node.js</span>
@@ -206,8 +197,8 @@
                     <span class="skill-tag">MongoDB</span>
                   </div>
                 </div>
-                <div class="skill-category">
-                  <h4>Tools & Learning</h4>
+                <div class="skill-category card reveal-child">
+                  <h4>Tools</h4>
                   <div class="skill-tags">
                     <span class="skill-tag">Git</span>
                     <span class="skill-tag">VS Code</span>
@@ -218,132 +209,290 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-            <div class="interests">
-              <h3>My Learning Journey:</h3>
-              <p>
-                When I'm not coding, you can find me watching programming
-                tutorials, reading documentation, participating in coding
-                communities, or experimenting with new technologies. I'm
-                passionate about turning ideas into code and love the
-                problem-solving aspect of development. Every project teaches me
-                something new, and I'm excited about the endless possibilities
-                in the world of programming.
-              </p>
+    <section id="projects" class="projects section-reveal">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2 class="section-title">Projects</h2>
+          <p class="section-subtitle">
+            Featured work and repositories from GitHub
+          </p>
+        </div>
+
+        <div class="featured-projects reveal">
+          <h3 class="subsection-title">Featured Projects</h3>
+          <p class="subsection-note">
+            Highlighted builds — full stack apps shipped end-to-end.
+          </p>
+          <div class="featured-grid reveal-group">
+            <article class="featured-card card reveal-child">
+              <div
+                class="featured-thumb"
+                style="--thumb-gradient: linear-gradient(135deg, #0a1420, #2d6cdf)"
+                aria-hidden="true"
+              ></div>
+              <div class="featured-body">
+                <h4>TechForum — Developer Q&amp;A Platform</h4>
+                <p>
+                  A full-stack forum where developers ask questions, vote on
+                  answers, and build reputation. Built with React, Node.js,
+                  Express, and MongoDB — featuring JWT auth, bcrypt password
+                  hashing, rate limiting, and protected routes.
+                </p>
+                <div class="featured-tags">
+                  <span class="tag">React</span>
+                  <span class="tag">Node.js</span>
+                  <span class="tag">Express</span>
+                  <span class="tag">MongoDB</span>
+                  <span class="tag">JWT</span>
+                  <span class="tag">REST API</span>
+                </div>
+                <div class="featured-links">
+                  <a
+                    href="https://david-foy89.github.io/Project4/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-small btn-primary"
+                    >Live Demo</a
+                  >
+                  <a
+                    href="https://github.com/david-foy89/TechForum---Advanced-Developer-Q-A-Platform"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-small btn-outline"
+                    ><i class="fab fa-github"></i> GitHub</a
+                  >
+                </div>
+              </div>
+            </article>
+            <article class="featured-card card reveal-child">
+              <div
+                class="featured-thumb"
+                style="--thumb-gradient: linear-gradient(135deg, #0f2744, #5b9aff)"
+                aria-hidden="true"
+              ></div>
+              <div class="featured-body">
+                <h4>LastWarTools — Game Utility Suite</h4>
+                <p>
+                  A browser-based toolkit for a mobile strategy game with
+                  369+ commits and real users. Features Firebase cloud sync,
+                  Tesseract OCR for screenshot parsing, Claude AI integration,
+                  AdSense monetization, and multi-language support.
+                </p>
+                <div class="featured-tags">
+                  <span class="tag">JavaScript</span>
+                  <span class="tag">Firebase</span>
+                  <span class="tag">OCR</span>
+                  <span class="tag">HTML/CSS</span>
+                  <span class="tag">GitHub Pages</span>
+                </div>
+                <div class="featured-links">
+                  <a
+                    href="https://david-foy89.github.io/LastWarTools/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-small btn-primary"
+                    >Live Site</a
+                  >
+                  <a
+                    href="https://github.com/david-foy89/LastWarTools"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-small btn-outline"
+                    ><i class="fab fa-github"></i> GitHub</a
+                  >
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <hr class="section-divider" aria-hidden="true" />
+
+        <div class="github-repos reveal">
+          <h3 class="subsection-title">GitHub Repositories</h3>
+          <p class="subsection-note">
+            Live from
+            <a
+              href="https://github.com/david-foy89"
+              target="_blank"
+              rel="noopener noreferrer"
+              >@david-foy89</a
+            >
+          </p>
+
+          <div class="controls-panel">
+            <div class="project-controls">
+            <div class="filter-controls">
+              <select id="language-filter" class="filter-select">
+                <option value="">All Languages</option>
+              </select>
+              <select id="sort-repos" class="filter-select">
+                <option value="updated">Recently Updated</option>
+                <option value="stars">Most Stars</option>
+                <option value="name">Name (A-Z)</option>
+                <option value="created">Recently Created</option>
+              </select>
+            </div>
+            <div class="view-toggle">
+              <button id="grid-view" class="view-btn active" type="button" aria-label="Grid view">
+                <i class="fas fa-th"></i>
+              </button>
+              <button id="list-view" class="view-btn" type="button" aria-label="List view">
+                <i class="fas fa-list"></i>
+              </button>
+            </div>
             </div>
           </div>
+
+          <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Loading repositories...</p>
+          </div>
+
+          <div id="error-message" class="error-message hidden" role="alert">
+            <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+            <p>
+              We couldn't load GitHub repositories right now. Please try again
+              in a few minutes, or visit my profile directly.
+            </p>
+            <a
+              href="https://github.com/david-foy89"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-primary error-fallback-btn"
+              >View on GitHub</a
+            >
+            <button id="retry-repos" type="button" class="btn btn-secondary">
+              Try Again
+            </button>
+          </div>
+
+          <div id="projects-grid" class="projects-grid reveal-group"></div>
         </div>
       </div>
     </section>
 
-    <!-- Projects Section -->
-    <section id="projects" class="projects">
+    <section id="contact" class="contact section-reveal">
       <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">My Projects</h2>
-          <p class="section-subtitle">
-            Here are some of my finished projects from GitHub
-          </p>
-        </div>
-
-        <!-- GitHub Username Input -->
-        <div class="github-input">
-          <div class="input-group">
-            <input
-              type="text"
-              id="github-username"
-              placeholder="Enter your GitHub username"
-              class="github-input-field"
-              value="david-foy89"
-            />
-            <button id="load-repos" class="btn btn-primary">
-              Load My Repositories
-            </button>
-          </div>
-        </div>
-
-        <!-- Filter and Sort -->
-        <div class="project-controls">
-          <div class="filter-controls">
-            <select id="language-filter" class="filter-select">
-              <option value="">All Languages</option>
-            </select>
-            <select id="sort-repos" class="filter-select">
-              <option value="updated">Recently Updated</option>
-              <option value="stars">Most Stars</option>
-              <option value="name">Name (A-Z)</option>
-              <option value="created">Recently Created</option>
-            </select>
-          </div>
-          <div class="view-toggle">
-            <button id="grid-view" class="view-btn">
-              <i class="fas fa-th"></i>
-            </button>
-            <button id="list-view" class="view-btn active">
-              <i class="fas fa-list"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Loading State -->
-        <div id="loading" class="loading hidden">
-          <div class="spinner"></div>
-          <p>Loading repositories...</p>
-        </div>
-
-        <!-- Error State -->
-        <div id="error-message" class="error-message hidden">
-          <p>
-            Unable to load repositories. Please check the username and try
-            again.
-          </p>
-        </div>
-
-        <!-- Projects Grid -->
-        <div id="projects-grid" class="projects-grid list-view">
-          <!-- Projects will be loaded here -->
-        </div>
-      </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-      <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
           <h2 class="section-title">Get In Touch</h2>
           <p class="section-subtitle">
-            Let's connect and build something amazing together
+            Have a project in mind or want to connect? Send a message.
           </p>
         </div>
-        <div class="contact-content">
-          <div class="contact-info">
-            <div class="contact-item">
+        <div class="contact-content reveal">
+          <form
+            id="contact-form"
+            class="contact-form card"
+            action="https://formspree.io/f/xpqeaybn"
+            method="POST"
+          >
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                autocomplete="name"
+                placeholder="Your name"
+              />
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                autocomplete="email"
+                placeholder="you@example.com"
+              />
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea
+                id="message"
+                name="message"
+                rows="5"
+                required
+                placeholder="Tell me about your project or question..."
+              ></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-submit">
+              Send Message
+            </button>
+            <p id="form-status" class="form-status hidden" role="status"></p>
+          </form>
+
+          <div class="contact-links">
+            <a href="mailto:david.foy89@gmail.com" class="contact-item card">
               <i class="fas fa-envelope"></i>
               <span>david.foy89@gmail.com</span>
-            </div>
-            <div class="contact-item">
+            </a>
+            <a
+              href="https://github.com/david-foy89"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="contact-item card"
+              id="github-link"
+            >
               <i class="fab fa-github"></i>
-              <span id="github-link">github.com/david-foy89</span>
-            </div>
-            <div class="contact-item">
+              <span>github.com/david-foy89</span>
+            </a>
+            <a
+              href="https://www.linkedin.com/in/david-foy-a54690370/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="contact-item card"
+            >
               <i class="fab fa-linkedin"></i>
-              <a
-                href="https://www.linkedin.com/in/david-foy-a54690370/"
-                target="_blank"
-                >linkedin.com/in/david-foy-a54690370/</a
-              >
-            </div>
+              <span>LinkedIn</span>
+            </a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
       <div class="container">
-        <p>&copy; 2026 David Foy. Built with ❤️ and GitHub API</p>
+        <p class="footer-copy">&copy; 2026 David Foy</p>
+        <p class="footer-tagline">
+          Built with ❤️ using HTML, CSS, JavaScript &amp; the GitHub API
+        </p>
       </div>
     </footer>
+
+    <p id="bg-play-hint" class="bg-play-hint" role="status" aria-live="polite" hidden>
+      Chain dots · drag &amp; fling your shape to float · double-click ends chain ·
+      <kbd>Esc</kbd> clears
+    </p>
+
+    <button
+      type="button"
+      class="bg-sketch-toggle"
+      id="bg-sketch-toggle"
+      aria-pressed="false"
+      aria-label="Draw patterns on the background network"
+      title="Draw on background"
+    >
+      <i class="fas fa-shapes" aria-hidden="true"></i>
+    </button>
+
+    <button
+      type="button"
+      class="back-to-top"
+      id="back-to-top"
+      aria-label="Back to top"
+      title="Back to top"
+    >
+      <i class="fas fa-arrow-up" aria-hidden="true"></i>
+    </button>
 
     <script src="script.js"></script>
   </body>
