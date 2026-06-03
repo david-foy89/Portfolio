@@ -113,12 +113,15 @@ body.bg-sketch-active .page-bg__canvas {
   opacity: 0.92;
 }
 
-body.bg-sketch-active .navbar,
 body.bg-sketch-active .hero,
 body.bg-sketch-active section,
 body.bg-sketch-active footer,
 body.bg-sketch-active .skip-link {
   pointer-events: none;
+}
+
+body.bg-sketch-active .navbar {
+  pointer-events: auto;
 }
 
 body.bg-sketch-active .bg-sketch-toggle,
@@ -423,10 +426,12 @@ body.page-loaded .hero-stagger {
 .navbar {
   position: fixed;
   top: var(--spacing-sm);
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 32px);
+  left: 16px;
+  right: 16px;
+  width: auto;
   max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
   z-index: 1000;
   padding: 10px var(--spacing-sm);
   background: rgba(0, 0, 0, 0.65);
@@ -442,6 +447,7 @@ body.page-loaded .hero-stagger {
   justify-content: space-between;
   align-items: center;
   gap: var(--spacing-sm);
+  position: relative;
 }
 
 .nav-logo h2 {
@@ -493,7 +499,21 @@ body.page-loaded .hero-stagger {
 .hamburger {
   display: none;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  padding: 8px;
+  margin: 0;
+  border: none;
+  background: transparent;
   cursor: pointer;
+  border-radius: var(--radius-pill);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hamburger:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
 }
 
 .bar {
@@ -1984,27 +2004,38 @@ select:focus-visible {
 @media (max-width: 768px) {
   .navbar {
     top: 12px;
-    width: calc(100% - 24px);
+    left: 12px;
+    right: 12px;
+    width: auto;
     border-radius: var(--radius);
     padding: 12px var(--spacing-sm);
   }
 
   .nav-menu {
-    position: fixed;
-    left: -100%;
-    top: 72px;
-    right: 12px;
-    width: auto;
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    width: 100%;
     flex-direction: column;
     background: rgba(0, 0, 0, 0.92);
     backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     text-align: center;
-    transition: left 0.3s var(--ease);
     box-shadow: var(--shadow);
     padding: var(--spacing-sm);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     gap: 4px;
+    z-index: 1001;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition:
+      opacity 0.25s var(--ease),
+      transform 0.25s var(--ease),
+      visibility 0.25s;
   }
 
   .nav-link {
@@ -2014,7 +2045,14 @@ select:focus-visible {
   }
 
   .nav-menu.active {
-    left: 12px;
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  body.nav-open {
+    overflow: hidden;
   }
 
   .hamburger {

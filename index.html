@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://davidkfoy.com" />
     <title>David Foy — Full Stack Developer</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=14" />
+    <link rel="stylesheet" href="styles.css?v=15" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -43,7 +43,7 @@
         <div class="nav-logo">
           <h2>David Foy</h2>
         </div>
-        <ul class="nav-menu">
+        <ul class="nav-menu" id="nav-menu">
           <li class="nav-item">
             <a href="#home" class="nav-link">Home</a>
           </li>
@@ -57,11 +57,18 @@
             <a href="#contact" class="nav-link">Contact</a>
           </li>
         </ul>
-        <div class="hamburger" aria-label="Toggle menu">
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
-        </div>
+        <button
+          type="button"
+          class="hamburger"
+          id="nav-toggle"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+          aria-controls="nav-menu"
+        >
+          <span class="bar" aria-hidden="true"></span>
+          <span class="bar" aria-hidden="true"></span>
+          <span class="bar" aria-hidden="true"></span>
+        </button>
       </div>
     </nav>
 
@@ -714,6 +721,6 @@
       </div>
     </div>
 
-    <script src="script.js?v=19"></script>
+    <script src="script.js?v=20"></script>
   </body>
 </html>

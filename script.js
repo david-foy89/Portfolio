@@ -1403,7 +1403,7 @@ function initScrollReveal() {
 }
 
 function initializeEventListeners() {
-  hamburger.addEventListener('click', toggleMobileNav);
+  initMobileNav();
 
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
     anchor.addEventListener('click', function (e) {
@@ -1413,8 +1413,7 @@ function initializeEventListeners() {
       const target = document.querySelector(href);
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        hamburger.classList.remove('active');
-        navMenu.classList.remove('active');
+        closeMobileNav();
       }
     });
   });
@@ -1433,9 +1432,69 @@ function initializeEventListeners() {
   }
 }
 
+const MOBILE_NAV_MQ = window.matchMedia('(max-width: 768px)');
+
+function isMobileNavViewport() {
+  return MOBILE_NAV_MQ.matches;
+}
+
+function setMobileNavOpen(open) {
+  if (!hamburger || !navMenu) return;
+
+  const isOpen = Boolean(open);
+  hamburger.classList.toggle('active', isOpen);
+  navMenu.classList.toggle('active', isOpen);
+  hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  document.body.classList.toggle('nav-open', isOpen && isMobileNavViewport());
+}
+
+function openMobileNav() {
+  setMobileNavOpen(true);
+}
+
+function closeMobileNav() {
+  setMobileNavOpen(false);
+}
+
 function toggleMobileNav() {
-  hamburger.classList.toggle('active');
-  navMenu.classList.toggle('active');
+  if (!navMenu) return;
+  setMobileNavOpen(!navMenu.classList.contains('active'));
+}
+
+function initMobileNav() {
+  if (!hamburger || !navMenu) return;
+
+  hamburger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMobileNav();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!navMenu.classList.contains('active')) return;
+    if (e.target.closest('.navbar')) return;
+    closeMobileNav();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+      closeMobileNav();
+      hamburger.focus();
+    }
+  });
+
+  const onViewportChange = () => {
+    if (!isMobileNavViewport()) {
+      closeMobileNav();
+    }
+  };
+
+  if (typeof MOBILE_NAV_MQ.addEventListener === 'function') {
+    MOBILE_NAV_MQ.addEventListener('change', onViewportChange);
+  } else {
+    MOBILE_NAV_MQ.addListener(onViewportChange);
+  }
+
+  window.addEventListener('resize', onViewportChange);
 }
 
 function githubHeaders() {
