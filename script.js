@@ -18,13 +18,41 @@ const REPO_DESCRIPTIONS = {
     'React todo app with Redux Toolkit — CRUD tasks, All/Active/Completed filters, localStorage persistence, and a contact form with controlled inputs.',
 };
 
-/** Correct live demo URLs (overrides stale GitHub homepage fields) */
-const REPO_LIVE_DEMOS = {
-  'TechForum---Advanced-Developer-Q-A-Platform':
-    'https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/',
-  LastWarTools: 'https://david-foy89.github.io/LastWarTools/',
-  Giphy_Project: 'https://david-foy89.github.io/Giphy_Project/index.html',
+const GITHUB_PAGES_USER = 'https://david-foy89.github.io';
+
+/**
+ * Live site URLs and button labels (overrides stale/missing GitHub homepage fields).
+ * label: "Live Demo" | "Live Site"
+ */
+const REPO_LIVE_LINKS = {
+  Portfolio: { url: 'https://davidkfoy.com/', label: 'Live Site' },
+  'TechForum---Advanced-Developer-Q-A-Platform': {
+    url: 'https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/',
+    label: 'Live Demo',
+  },
+  LastWarTools: {
+    url: 'https://david-foy89.github.io/LastWarTools/',
+    label: 'Live Site',
+  },
+  'Kanban-Board': {
+    url: 'https://david-foy89.github.io/Kanban-Board/',
+    label: 'Live Demo',
+  },
+  Giphy_Project: {
+    url: 'https://david-foy89.github.io/Giphy_Project/index.html',
+    label: 'Live Demo',
+  },
+  'Big-Daddy-Dave-s-BBQ': {
+    url: 'https://david-foy89.github.io/Big-Daddy-Dave-s-BBQ/',
+    label: 'Live Site',
+  },
+  'Task-Management-App': {
+    url: 'https://david-foy89.github.io/Task-Management-App/',
+    label: 'Live Demo',
+  },
 };
+
+const STALE_HOMEPAGE_PATTERNS = ['/Project4'];
 
 const languageColors = {
   JavaScript: '#f1e05a',
@@ -66,6 +94,23 @@ const cursorRing = document.getElementById('cursor-ring');
 
 const backToTopBtn = document.getElementById('back-to-top');
 
+const HERO_DEMO_FRAME = { width: 1280, height: 800 };
+
+const HERO_FEATURED_DEMOS = [
+  {
+    title: 'TechForum',
+    host: 'TechForum — GitHub Pages',
+    url: 'https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/',
+    label: 'Live Demo',
+  },
+  {
+    title: 'LastWarTools',
+    host: 'LastWarTools — GitHub Pages',
+    url: 'https://david-foy89.github.io/LastWarTools/',
+    label: 'Live Site',
+  },
+];
+
 document.addEventListener('DOMContentLoaded', () => {
   initPageLoad();
   initBackgroundCanvas();
@@ -74,8 +119,403 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavObserver();
   initScrollReveal();
   initBackToTop();
+  initHeroDemoShowcase();
+  initExpandableDescriptions();
   loadRepositories();
+  scanExpandableDescriptions(document);
 });
+
+function initExpandableDescriptions() {
+  if (document.body.dataset.descToggleInit) return;
+  document.body.dataset.descToggleInit = 'true';
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.description-toggle');
+    if (!btn) return;
+
+    const block = btn.closest('.description-block');
+    const text = block?.querySelector('.clamp-text');
+    if (!block || !text) return;
+
+    const expanded = block.classList.toggle('is-expanded');
+    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    btn.textContent = expanded ? 'Less' : 'More';
+
+    if (!expanded) {
+      updateDescriptionToggle(block, btn, text);
+    }
+  });
+}
+
+function updateDescriptionToggle(block, btn, text) {
+  if (block.classList.contains('is-expanded')) {
+    btn.hidden = false;
+    return;
+  }
+  btn.hidden = text.scrollHeight <= text.clientHeight + 2;
+}
+
+function scanExpandableDescriptions(scope = document) {
+  scope.querySelectorAll('.description-block').forEach((block) => {
+    const text = block.querySelector('.clamp-text');
+    const btn = block.querySelector('.description-toggle');
+    if (!text || !btn) return;
+
+    if (text.classList.contains('is-clamp-empty')) {
+      btn.hidden = true;
+      return;
+    }
+
+    updateDescriptionToggle(block, btn, text);
+    btn.textContent = block.classList.contains('is-expanded') ? 'Less' : 'More';
+    btn.setAttribute(
+      'aria-expanded',
+      block.classList.contains('is-expanded') ? 'true' : 'false'
+    );
+  });
+}
+
+function buildDescriptionBlock(innerHtml, { empty = false } = {}) {
+  if (empty) {
+    return `<div class="description-block">
+      <p class="clamp-text project-description is-clamp-empty">No description provided.</p>
+    </div>`;
+  }
+
+  return `<div class="description-block">
+    <p class="clamp-text project-description">${innerHtml}</p>
+    <button type="button" class="description-toggle" hidden aria-expanded="false">More</button>
+  </div>`;
+}
+
+function initHeroDemoShowcase() {
+  const root = document.getElementById('hero-demo');
+  const frame = document.getElementById('hero-demo-frame');
+  const urlEl = document.getElementById('hero-demo-url');
+  const openBtn = document.getElementById('hero-demo-open');
+  const openLabel = openBtn?.querySelector('.hero-demo__open-label');
+  const expandBtn = document.getElementById('hero-demo-expand');
+  const panel = document.getElementById('hero-demo-panel');
+  const tabs = root?.querySelectorAll('.hero-demo__tab');
+
+  const popoutRoot = document.getElementById('hero-demo-popout');
+  const popoutFrame = document.getElementById('hero-demo-popout-frame');
+  const popoutUrlEl = document.getElementById('hero-demo-popout-url');
+  const popoutOpen = document.getElementById('hero-demo-popout-open');
+  const popoutOpenLabel = document.getElementById('hero-demo-popout-open-label');
+  const popoutClose = document.getElementById('hero-demo-popout-close');
+  const popoutPanel = document.getElementById('hero-demo-popout-panel');
+  const popoutCloseTriggers = popoutRoot?.querySelectorAll('[data-popout-close]');
+  const demoTabSelector = '#hero-demo .hero-demo__tab, #hero-demo-popout .hero-demo__tab';
+
+  if (!root || !frame || !urlEl || !openBtn || !openLabel || !tabs?.length) return;
+
+  const prefersReducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)'
+  ).matches;
+
+  let activeIndex = 0;
+  let rotateTimer = null;
+  let interactResumeTimer = null;
+  let scrollLockY = null;
+  let scrollLockRaf = null;
+  let popoutPreviousFocus = null;
+
+  function isPopoutOpen() {
+    return Boolean(popoutRoot?.classList.contains('is-open'));
+  }
+
+  function normalizeFrameUrl(url) {
+    if (!url || url === 'about:blank') return '';
+    try {
+      return new URL(url, window.location.href).href;
+    } catch {
+      return url;
+    }
+  }
+
+  function syncAllDemoTabs(index) {
+    document.querySelectorAll(demoTabSelector).forEach((tab) => {
+      const i = Number(tab.dataset.demoIndex);
+      const isActive = i === index;
+      tab.classList.toggle('is-active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    panel?.setAttribute('aria-labelledby', `hero-demo-tab-${index}`);
+    popoutPanel?.setAttribute('aria-labelledby', `hero-demo-popout-tab-${index}`);
+  }
+
+  function syncDemoLinks(demo) {
+    const openLabelText = demo.label;
+    const openAria = `Open ${demo.title} ${demo.label.toLowerCase()} in a new tab`;
+
+    urlEl.textContent = demo.host;
+    openBtn.href = demo.url;
+    openLabel.textContent = openLabelText;
+    openBtn.setAttribute('aria-label', openAria);
+
+    if (popoutUrlEl) popoutUrlEl.textContent = demo.host;
+    if (popoutOpen) {
+      popoutOpen.href = demo.url;
+      popoutOpen.setAttribute('aria-label', openAria);
+    }
+    if (popoutOpenLabel) popoutOpenLabel.textContent = openLabelText;
+  }
+
+  function setPopoutFrameSrc(url, { resetScroll = false } = {}) {
+    if (!popoutFrame || !url) return;
+
+    const target = normalizeFrameUrl(url);
+    const current = normalizeFrameUrl(popoutFrame.src);
+
+    if (resetScroll) {
+      popoutFrame.addEventListener(
+        'load',
+        () => {
+          try {
+            popoutFrame.contentWindow?.scrollTo(0, 0);
+          } catch {
+            /* cross-origin */
+          }
+        },
+        { once: true }
+      );
+    }
+
+    if (!current || current !== target) {
+      popoutFrame.src = url;
+    } else if (resetScroll) {
+      try {
+        popoutFrame.contentWindow?.scrollTo(0, 0);
+      } catch {
+        /* cross-origin */
+      }
+    }
+  }
+
+  function openPopout() {
+    if (!popoutRoot || !popoutFrame) return;
+
+    const demo = HERO_FEATURED_DEMOS[activeIndex];
+    if (!demo) return;
+
+    pauseRotateForInteraction();
+    stopRotate();
+    syncAllDemoTabs(activeIndex);
+    syncDemoLinks(demo);
+
+    popoutFrame.title = `${demo.title} expanded live preview`;
+    const heroSrc = normalizeFrameUrl(frame.src);
+    const startUrl = heroSrc || demo.url;
+
+    popoutRoot.classList.add('is-open');
+    popoutRoot.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('hero-demo-popout-open');
+    unlockPageScroll();
+
+    expandBtn?.setAttribute('aria-expanded', 'true');
+    popoutPreviousFocus = document.activeElement;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setPopoutFrameSrc(startUrl);
+        popoutClose?.focus();
+      });
+    });
+  }
+
+  function closePopout() {
+    if (!popoutRoot?.classList.contains('is-open')) return;
+
+    popoutRoot.classList.remove('is-open');
+    popoutRoot.setAttribute('aria-hidden', 'true');
+    expandBtn?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('hero-demo-popout-open');
+
+    if (popoutFrame) {
+      popoutFrame.src = 'about:blank';
+    }
+
+    if (popoutPreviousFocus && typeof popoutPreviousFocus.focus === 'function') {
+      popoutPreviousFocus.focus();
+    }
+    popoutPreviousFocus = null;
+
+    requestAnimationFrame(() => {
+      if (!isHeroEngaged()) startRotate();
+    });
+  }
+
+  function preservePageScroll() {
+    const y = scrollLockY ?? window.scrollY;
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+    });
+  }
+
+  function lockPageScroll() {
+    scrollLockY = window.scrollY;
+    if (scrollLockRaf) return;
+    const tick = () => {
+      if (scrollLockY !== null && window.scrollY !== scrollLockY) {
+        window.scrollTo({ top: scrollLockY, left: 0, behavior: 'instant' });
+      }
+      scrollLockRaf = requestAnimationFrame(tick);
+    };
+    scrollLockRaf = requestAnimationFrame(tick);
+  }
+
+  function unlockPageScroll() {
+    scrollLockY = null;
+    if (scrollLockRaf) {
+      cancelAnimationFrame(scrollLockRaf);
+      scrollLockRaf = null;
+    }
+  }
+
+  function isHeroEngaged() {
+    return (
+      isPopoutOpen() ||
+      root.matches(':hover') ||
+      document.activeElement === frame
+    );
+  }
+
+  function onHeroDisengage() {
+    requestAnimationFrame(() => {
+      if (isHeroEngaged()) return;
+      unlockPageScroll();
+      clearTimeout(interactResumeTimer);
+      interactResumeTimer = setTimeout(() => startRotate(), 4000);
+    });
+  }
+
+  function updateHeroDemoScale() {
+    if (!panel) return;
+    const scale = Math.min(
+      panel.clientWidth / HERO_DEMO_FRAME.width,
+      panel.clientHeight / HERO_DEMO_FRAME.height,
+      0.52
+    );
+    panel.style.setProperty('--hero-demo-scale', String(scale));
+  }
+
+  function pauseRotateForInteraction() {
+    stopRotate();
+    clearTimeout(interactResumeTimer);
+    interactResumeTimer = setTimeout(() => startRotate(), 14000);
+  }
+
+  function setDemo(index) {
+    const demo = HERO_FEATURED_DEMOS[index];
+    if (!demo) return;
+
+    activeIndex = index;
+
+    syncAllDemoTabs(index);
+    syncDemoLinks(demo);
+
+    const targetUrl = demo.url;
+    frame.title = `${demo.title} live preview`;
+    updateHeroDemoScale();
+
+    frame.addEventListener(
+      'load',
+      () => {
+        try {
+          frame.contentWindow?.scrollTo(0, 0);
+        } catch {
+          /* cross-origin */
+        }
+        preservePageScroll();
+      },
+      { once: true }
+    );
+
+    if (frame.src !== targetUrl) {
+      frame.src = targetUrl;
+    }
+
+    if (isPopoutOpen()) {
+      popoutFrame.title = `${demo.title} expanded live preview`;
+      setPopoutFrameSrc(targetUrl, { resetScroll: true });
+    }
+  }
+
+  function stopRotate() {
+    if (rotateTimer) {
+      clearInterval(rotateTimer);
+      rotateTimer = null;
+    }
+  }
+
+  function startRotate() {
+    if (prefersReducedMotion || HERO_FEATURED_DEMOS.length < 2) return;
+    stopRotate();
+    rotateTimer = setInterval(() => {
+      setDemo((activeIndex + 1) % HERO_FEATURED_DEMOS.length);
+    }, 9000);
+  }
+
+  document.querySelectorAll(demoTabSelector).forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const index = Number(tab.dataset.demoIndex);
+      if (Number.isNaN(index)) return;
+      setDemo(index);
+      pauseRotateForInteraction();
+    });
+  });
+
+  if (panel) {
+    panel.addEventListener('pointerdown', pauseRotateForInteraction);
+    panel.addEventListener('wheel', pauseRotateForInteraction, { passive: true });
+  }
+
+  frame.addEventListener('focus', () => {
+    pauseRotateForInteraction();
+    lockPageScroll();
+    preservePageScroll();
+  });
+
+  frame.addEventListener('blur', onHeroDisengage);
+
+  root.addEventListener('pointerenter', () => {
+    stopRotate();
+    lockPageScroll();
+  });
+  root.addEventListener('pointerleave', onHeroDisengage);
+  frame.addEventListener('pointerenter', () => {
+    stopRotate();
+    lockPageScroll();
+  });
+  frame.addEventListener('pointerleave', onHeroDisengage);
+
+  frame.addEventListener('load', preservePageScroll);
+
+  expandBtn?.addEventListener('click', openPopout);
+  popoutClose?.addEventListener('click', closePopout);
+  popoutCloseTriggers?.forEach((el) => {
+    el.addEventListener('click', closePopout);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isPopoutOpen()) {
+      e.preventDefault();
+      closePopout();
+    }
+  });
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(updateHeroDemoScale, 120);
+  });
+
+  setDemo(0);
+  updateHeroDemoScale();
+  startRotate();
+}
 
 function initPageLoad() {
   requestAnimationFrame(() => {
@@ -97,7 +537,7 @@ function initBackgroundCanvas() {
   ).matches;
   const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
   const INTERACTIVE =
-    'a, button, .btn, .project-link, .view-btn, .contact-item, .hamburger, .back-to-top, .bg-sketch-toggle, input, textarea, select, label';
+    'a, button, .btn, .project-link, .view-btn, .contact-item, .hamburger, .back-to-top, .bg-sketch-toggle, input, textarea, select, label, #hero-demo, .hero-demo__tab, .hero-demo__viewport, .hero-demo__frame, #hero-demo-popout, .hero-demo--popout, .hero-demo-popout__close, .hero-demo-popout__backdrop';
 
   const mouse = { x: 0, y: 0, active: false };
   const palette = {
@@ -1132,6 +1572,7 @@ function displayRepositories() {
 
   projectsGrid.innerHTML = filteredRepos.map(createRepositoryCard).join('');
   applyRevealStagger(projectsGrid);
+  scanExpandableDescriptions(projectsGrid);
 }
 
 function getRepoDescription(repo) {
@@ -1142,19 +1583,34 @@ function getRepoDescription(repo) {
   return null;
 }
 
-function getRepoLiveDemo(repo) {
-  const override = REPO_LIVE_DEMOS[repo.name];
-  if (override) return override;
+function isStaleHomepage(url) {
+  return STALE_HOMEPAGE_PATTERNS.some((part) => url.includes(part));
+}
+
+function getRepoLiveLink(repo) {
+  const custom = REPO_LIVE_LINKS[repo.name];
+  if (custom) return custom;
+
   const homepage = repo.homepage?.trim();
-  if (!homepage || homepage.includes('/Project4')) return null;
-  return homepage;
+  if (homepage && !isStaleHomepage(homepage)) {
+    return { url: homepage, label: 'Live Demo' };
+  }
+
+  if (repo.has_pages) {
+    return {
+      url: `${GITHUB_PAGES_USER}/${repo.name}/`,
+      label: 'Live Demo',
+    };
+  }
+
+  return null;
 }
 
 function createRepositoryCard(repo) {
   const descriptionText = getRepoDescription(repo);
-  const description = descriptionText
-    ? escapeHtml(descriptionText)
-    : '<span class="project-description--empty">No description provided.</span>';
+  const descriptionBlock = descriptionText
+    ? buildDescriptionBlock(escapeHtml(descriptionText))
+    : buildDescriptionBlock('', { empty: true });
 
   const language = repo.language;
   const languageColor = languageColors[language] || '#858585';
@@ -1168,11 +1624,11 @@ function createRepositoryCard(repo) {
     : '';
 
   const stars = repo.stargazers_count ?? 0;
-  const liveDemo = getRepoLiveDemo(repo);
-  const liveDemoHtml = liveDemo
-    ? `<a href="${escapeHtml(liveDemo)}" target="_blank" rel="noopener noreferrer" class="project-link project-link--demo">
+  const liveLink = getRepoLiveLink(repo);
+  const liveLinkHtml = liveLink
+    ? `<a href="${escapeHtml(liveLink.url)}" target="_blank" rel="noopener noreferrer" class="project-link project-link--live">
           <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          Live Demo
+          ${escapeHtml(liveLink.label)}
         </a>`
     : '';
 
@@ -1183,7 +1639,7 @@ function createRepositoryCard(repo) {
           <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer">${escapeHtml(repo.name)}</a>
         </h3>
       </div>
-      <p class="project-description">${description}</p>
+      ${descriptionBlock}
       ${languageHtml}
       <div class="project-meta">
         <div class="meta-item" title="Stars">
@@ -1192,10 +1648,10 @@ function createRepositoryCard(repo) {
         </div>
       </div>
       <div class="project-links">
-        ${liveDemoHtml}
-        <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="project-link">
+        ${liveLinkHtml}
+        <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="project-link project-link--github">
           <i class="fab fa-github" aria-hidden="true"></i>
-          View on GitHub
+          GitHub
         </a>
       </div>
     </article>

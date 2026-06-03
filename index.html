@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://davidkfoy.com" />
     <title>David Foy — Full Stack Developer</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=2" />
+    <link rel="stylesheet" href="styles.css?v=9" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -87,21 +87,85 @@
           </div>
         </div>
         <div class="hero-image hero-stagger" style="--stagger: 320ms">
-          <div class="code-snippet-card">
-            <div class="code-snippet-header">
-              <span class="code-dot"></span>
-              <span class="code-dot"></span>
-              <span class="code-dot"></span>
-              <span class="code-filename">routes/health.js</span>
+          <div class="hero-demo card" id="hero-demo" aria-label="Featured project live previews">
+            <div class="browser-chrome">
+              <span class="code-dot" aria-hidden="true"></span>
+              <span class="code-dot" aria-hidden="true"></span>
+              <span class="code-dot" aria-hidden="true"></span>
+              <span class="hero-demo__url" id="hero-demo-url">david-foy89.github.io</span>
             </div>
-            <pre class="code-snippet-body"><code><span class="code-comment">// Express health check — real pattern from my projects</span>
-<span class="code-keyword">export function</span> <span class="code-function">healthCheck</span>(req, res) {
-  <span class="code-keyword">const</span> payload = {
-    status: <span class="code-string">'ok'</span>,
-    uptime: process.uptime(),
-  };
-  res.status(<span class="code-number">200</span>).json(payload);
-}</code></pre>
+            <div
+              class="hero-demo__tabs"
+              role="tablist"
+              aria-label="Choose a featured project preview"
+            >
+              <button
+                type="button"
+                role="tab"
+                class="hero-demo__tab is-active"
+                id="hero-demo-tab-0"
+                aria-selected="true"
+                aria-controls="hero-demo-panel"
+                data-demo-index="0"
+              >
+                TechForum
+              </button>
+              <button
+                type="button"
+                role="tab"
+                class="hero-demo__tab"
+                id="hero-demo-tab-1"
+                aria-selected="false"
+                aria-controls="hero-demo-panel"
+                data-demo-index="1"
+              >
+                LastWarTools
+              </button>
+            </div>
+            <div
+              class="hero-demo__viewport"
+              id="hero-demo-panel"
+              role="tabpanel"
+              aria-labelledby="hero-demo-tab-0"
+            >
+              <div class="hero-demo__scaler">
+                <iframe
+                  class="hero-demo__frame"
+                  id="hero-demo-frame"
+                  title="TechForum live preview"
+                  src="https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+                ></iframe>
+              </div>
+            </div>
+            <div class="hero-demo__actions">
+              <div class="hero-demo__actions-btns">
+                <button
+                  type="button"
+                  class="project-link project-link--github hero-demo__expand"
+                  id="hero-demo-expand"
+                  aria-haspopup="dialog"
+                  aria-controls="hero-demo-popout"
+                  aria-expanded="false"
+                >
+                  <i class="fas fa-expand" aria-hidden="true"></i>
+                  Expand
+                </button>
+                <a
+                  class="project-link project-link--live hero-demo__open"
+                  id="hero-demo-open"
+                  href="https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                  <span class="hero-demo__open-label">Live Demo</span>
+                </a>
+              </div>
+              <span class="hero-demo__hint">Expand for full preview · tab to switch</span>
+            </div>
           </div>
         </div>
       </div>
@@ -230,19 +294,38 @@
           </p>
           <div class="featured-grid reveal-group">
             <article class="featured-card card reveal-child">
-              <div
-                class="featured-thumb"
-                style="--thumb-gradient: linear-gradient(135deg, #0a1420, #2d6cdf)"
-                aria-hidden="true"
-              ></div>
+              <a
+                class="featured-thumb featured-thumb--live"
+                href="https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open TechForum live demo"
+              >
+                <div class="featured-thumb__browser">
+                  <iframe
+                    src="https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/"
+                    title="TechForum preview"
+                    loading="lazy"
+                    tabindex="-1"
+                  ></iframe>
+                </div>
+                <span class="featured-thumb__label">
+                  <i class="fas fa-play-circle" aria-hidden="true"></i>
+                  Live preview
+                </span>
+              </a>
               <div class="featured-body">
                 <h4>TechForum — Developer Q&amp;A Platform</h4>
-                <p>
-                  A full-stack forum where developers ask questions, vote on
-                  answers, and build reputation. Built with React, Node.js,
-                  Express, and MongoDB — featuring JWT auth, bcrypt password
-                  hashing, rate limiting, and protected routes.
-                </p>
+                <div class="description-block">
+                  <p class="clamp-text featured-description">
+                    Full-stack developer Q&amp;A forum — ask questions, vote on answers,
+                    and build reputation. React, Node.js, Express, MongoDB, JWT auth,
+                    and protected routes.
+                  </p>
+                  <button type="button" class="description-toggle" hidden aria-expanded="false">
+                    More
+                  </button>
+                </div>
                 <div class="featured-tags">
                   <span class="tag">React</span>
                   <span class="tag">Node.js</span>
@@ -251,38 +334,61 @@
                   <span class="tag">JWT</span>
                   <span class="tag">REST API</span>
                 </div>
-                <div class="featured-links">
+                <div class="featured-links project-links">
                   <a
                     href="https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="btn btn-small btn-primary"
-                    >Live Demo</a
+                    class="project-link project-link--live"
                   >
+                    <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                    Live Demo
+                  </a>
                   <a
                     href="https://github.com/david-foy89/TechForum---Advanced-Developer-Q-A-Platform"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="btn btn-small btn-outline"
-                    ><i class="fab fa-github"></i> GitHub</a
+                    class="project-link project-link--github"
                   >
+                    <i class="fab fa-github" aria-hidden="true"></i>
+                    GitHub
+                  </a>
                 </div>
               </div>
             </article>
             <article class="featured-card card reveal-child">
-              <div
-                class="featured-thumb"
-                style="--thumb-gradient: linear-gradient(135deg, #0f2744, #5b9aff)"
-                aria-hidden="true"
-              ></div>
+              <a
+                class="featured-thumb featured-thumb--live"
+                href="https://david-foy89.github.io/LastWarTools/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open LastWarTools live site"
+              >
+                <div class="featured-thumb__browser">
+                  <iframe
+                    src="https://david-foy89.github.io/LastWarTools/"
+                    title="LastWarTools preview"
+                    loading="lazy"
+                    tabindex="-1"
+                  ></iframe>
+                </div>
+                <span class="featured-thumb__label">
+                  <i class="fas fa-play-circle" aria-hidden="true"></i>
+                  Live preview
+                </span>
+              </a>
               <div class="featured-body">
                 <h4>LastWarTools — Game Utility Suite</h4>
-                <p>
-                  A browser-based toolkit for a mobile strategy game with
-                  369+ commits and real users. Features Firebase cloud sync,
-                  Tesseract OCR for screenshot parsing, Claude AI integration,
-                  AdSense monetization, and multi-language support.
-                </p>
+                <div class="description-block">
+                  <p class="clamp-text featured-description">
+                    Browser toolkit for a mobile strategy game — 369+ commits and real
+                    users. Firebase sync, screenshot OCR, Claude AI helpers, and
+                    multi-language support.
+                  </p>
+                  <button type="button" class="description-toggle" hidden aria-expanded="false">
+                    More
+                  </button>
+                </div>
                 <div class="featured-tags">
                   <span class="tag">JavaScript</span>
                   <span class="tag">Firebase</span>
@@ -290,21 +396,25 @@
                   <span class="tag">HTML/CSS</span>
                   <span class="tag">GitHub Pages</span>
                 </div>
-                <div class="featured-links">
+                <div class="featured-links project-links">
                   <a
                     href="https://david-foy89.github.io/LastWarTools/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="btn btn-small btn-primary"
-                    >Live Site</a
+                    class="project-link project-link--live"
                   >
+                    <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                    Live Site
+                  </a>
                   <a
                     href="https://github.com/david-foy89/LastWarTools"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="btn btn-small btn-outline"
-                    ><i class="fab fa-github"></i> GitHub</a
+                    class="project-link project-link--github"
                   >
+                    <i class="fab fa-github" aria-hidden="true"></i>
+                    GitHub
+                  </a>
                 </div>
               </div>
             </article>
@@ -430,7 +540,8 @@
             <p id="form-status" class="form-status hidden" role="status"></p>
           </form>
 
-          <div class="contact-links">
+          <aside class="contact-aside" aria-label="Other ways to reach me">
+            <div class="contact-links">
             <a href="mailto:david.foy89@gmail.com" class="contact-item card">
               <i class="fas fa-envelope"></i>
               <span>david.foy89@gmail.com</span>
@@ -454,7 +565,8 @@
               <i class="fab fa-linkedin"></i>
               <span>LinkedIn</span>
             </a>
-          </div>
+            </div>
+          </aside>
         </div>
       </div>
     </section>
@@ -494,6 +606,102 @@
       <i class="fas fa-arrow-up" aria-hidden="true"></i>
     </button>
 
-    <script src="script.js?v=4"></script>
+    <div
+      class="hero-demo-popout"
+      id="hero-demo-popout"
+      aria-hidden="true"
+    >
+      <button
+        type="button"
+        class="hero-demo-popout__backdrop"
+        data-popout-close
+        aria-label="Close expanded preview"
+      ></button>
+      <div
+        class="hero-demo hero-demo--popout card"
+        id="hero-demo-popout-shell"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="hero-demo-popout-url"
+      >
+        <div class="browser-chrome">
+          <span class="code-dot" aria-hidden="true"></span>
+          <span class="code-dot" aria-hidden="true"></span>
+          <span class="code-dot" aria-hidden="true"></span>
+          <span class="hero-demo__url" id="hero-demo-popout-url">TechForum — GitHub Pages</span>
+          <button
+            type="button"
+            class="hero-demo-popout__close"
+            id="hero-demo-popout-close"
+            aria-label="Close expanded preview"
+          >
+            <i class="fas fa-times" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div
+          class="hero-demo__tabs"
+          role="tablist"
+          aria-label="Choose a featured project in expanded preview"
+        >
+          <button
+            type="button"
+            role="tab"
+            class="hero-demo__tab is-active"
+            id="hero-demo-popout-tab-0"
+            aria-selected="true"
+            aria-controls="hero-demo-popout-panel"
+            data-demo-index="0"
+          >
+            TechForum
+          </button>
+          <button
+            type="button"
+            role="tab"
+            class="hero-demo__tab"
+            id="hero-demo-popout-tab-1"
+            aria-selected="false"
+            aria-controls="hero-demo-popout-panel"
+            data-demo-index="1"
+          >
+            LastWarTools
+          </button>
+        </div>
+        <div
+          class="hero-demo__viewport hero-demo__viewport--popout"
+          id="hero-demo-popout-panel"
+          role="tabpanel"
+          aria-labelledby="hero-demo-popout-tab-0"
+        >
+          <iframe
+            class="hero-demo__frame hero-demo__frame--popout"
+            id="hero-demo-popout-frame"
+            title="TechForum expanded live preview"
+            referrerpolicy="no-referrer-when-downgrade"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+          ></iframe>
+        </div>
+        <div class="hero-demo__actions">
+          <div class="hero-demo__actions-btns">
+            <a
+              class="project-link project-link--live"
+              id="hero-demo-popout-open"
+              href="https://david-foy89.github.io/TechForum---Advanced-Developer-Q-A-Platform/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+              <span id="hero-demo-popout-open-label">Live Demo</span>
+            </a>
+            <button type="button" class="project-link project-link--github" data-popout-close>
+              <i class="fas fa-times" aria-hidden="true"></i>
+              Close
+            </button>
+          </div>
+          <span class="hero-demo__hint">Scroll &amp; interact · Esc to close</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js?v=14"></script>
   </body>
 </html>
