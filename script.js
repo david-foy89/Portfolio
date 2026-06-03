@@ -31,7 +31,7 @@ const REPO_LIVE_LINKS = {
     label: 'Live Demo',
   },
   LastWarTools: {
-    url: 'https://david-foy89.github.io/LastWarTools/index.html',
+    url: 'https://lastwarsurvivaltools.com/',
     label: 'Live Site',
   },
   'Kanban-Board': {
@@ -105,8 +105,8 @@ const HERO_FEATURED_DEMOS = [
   },
   {
     title: 'LastWarTools',
-    host: 'LastWarTools — GitHub Pages',
-    url: 'https://david-foy89.github.io/LastWarTools/index.html',
+    host: 'lastwarsurvivaltools.com',
+    url: 'https://lastwarsurvivaltools.com/',
     label: 'Live Site',
   },
 ];
