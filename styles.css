@@ -1263,7 +1263,7 @@ body.bg-sketch-active .hero-demo-popout.is-open .hero-demo-popout__backdrop {
   padding: var(--spacing-xl) 0;
 }
 
-.featured-projects {
+.featured-projects:not(.showcase-projects) {
   margin-bottom: var(--spacing-md);
 }
 
@@ -1278,11 +1278,15 @@ body.bg-sketch-active .hero-demo-popout.is-open .hero-demo-popout__backdrop {
 
 .featured-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 380px));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   justify-content: center;
   gap: var(--spacing-md);
-  max-width: 840px;
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+.showcase-projects {
+  margin-bottom: var(--spacing-lg);
 }
 
 .featured-card {

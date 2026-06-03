@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://davidkfoy.com" />
     <title>David Foy — Full Stack Developer</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=15" />
+    <link rel="stylesheet" href="styles.css?v=17" />
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
@@ -260,7 +260,7 @@
             </div>
 
             <div class="skills">
-              <h3>Tech Stack</h3>
+              <h3>Technical Stack</h3>
               <div class="skill-categories reveal-group">
                 <div class="skill-category card reveal-child">
                   <h4>Frontend</h4>
@@ -304,14 +304,14 @@
         <div class="section-header reveal">
           <h2 class="section-title">Projects</h2>
           <p class="section-subtitle">
-            Featured work and repositories from GitHub
+            Featured work that showcases what I build — always on display, no API required.
           </p>
         </div>
 
-        <div class="featured-projects reveal">
-          <h3 class="subsection-title">Featured Projects</h3>
+        <div class="showcase-projects featured-projects reveal">
+          <h3 class="subsection-title">Featured Work</h3>
           <p class="subsection-note">
-            Highlighted builds — full stack apps shipped end-to-end.
+            Three flagship projects — full stack apps shipped end-to-end.
           </p>
           <div class="featured-grid reveal-group">
             <article class="featured-card card reveal-child">
@@ -439,21 +439,83 @@
                 </div>
               </div>
             </article>
+            <article class="featured-card card reveal-child">
+              <a
+                class="featured-thumb featured-thumb--live"
+                href="https://david-foy89.github.io/Kanban-Board/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open Kanban Board live demo"
+              >
+                <div class="featured-thumb__browser">
+                  <iframe
+                    src="https://david-foy89.github.io/Kanban-Board/"
+                    title="Kanban Board preview"
+                    loading="lazy"
+                    tabindex="-1"
+                  ></iframe>
+                </div>
+                <span class="featured-thumb__label">
+                  <i class="fas fa-play-circle" aria-hidden="true"></i>
+                  Live preview
+                </span>
+              </a>
+              <div class="featured-body">
+                <h4>Kanban Board — Task Workflow App</h4>
+                <div class="description-block">
+                  <p class="clamp-text featured-description">
+                    Interactive Kanban board with React, TypeScript, and Zustand —
+                    drag-and-drop tasks, column management, and localStorage persistence.
+                  </p>
+                  <button type="button" class="description-toggle" hidden aria-expanded="false">
+                    More
+                  </button>
+                </div>
+                <div class="featured-tags">
+                  <span class="tag">React</span>
+                  <span class="tag">TypeScript</span>
+                  <span class="tag">Zustand</span>
+                  <span class="tag">Drag &amp; Drop</span>
+                  <span class="tag">localStorage</span>
+                </div>
+                <div class="featured-links project-links">
+                  <a
+                    href="https://david-foy89.github.io/Kanban-Board/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="project-link project-link--live"
+                  >
+                    <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                    Live Demo
+                  </a>
+                  <a
+                    href="https://github.com/david-foy89/Kanban-Board"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="project-link project-link--github"
+                  >
+                    <i class="fab fa-github" aria-hidden="true"></i>
+                    GitHub
+                  </a>
+                </div>
+              </div>
+            </article>
           </div>
         </div>
 
         <hr class="section-divider" aria-hidden="true" />
 
-        <div class="github-repos reveal">
-          <h3 class="subsection-title">GitHub Repositories</h3>
+        <div class="github-activity github-repos reveal">
+          <h3 class="subsection-title">Latest Activity</h3>
           <p class="subsection-note">
-            Live from
+            Recent repositories from
             <a
               href="https://github.com/david-foy89"
               target="_blank"
               rel="noopener noreferrer"
               >@david-foy89</a
             >
+            — updates when the GitHub API is available.
           </p>
 
           <div class="controls-panel">
@@ -481,14 +543,14 @@
 
           <div id="loading" class="loading hidden">
             <div class="spinner"></div>
-            <p>Loading repositories...</p>
+            <p>Loading latest activity...</p>
           </div>
 
           <div id="error-message" class="error-message hidden" role="alert">
             <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
             <p>
-              We couldn't load GitHub repositories right now. Please try again
-              in a few minutes, or visit my profile directly.
+              Latest activity couldn't be loaded right now. Your featured work
+              above is always visible — try again later or visit my profile directly.
             </p>
             <a
               href="https://github.com/david-foy89"
@@ -721,6 +783,6 @@
       </div>
     </div>
 
-    <script src="script.js?v=20"></script>
+    <script src="script.js?v=24"></script>
   </body>
 </html>

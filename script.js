@@ -1542,10 +1542,7 @@ async function loadRepositories() {
     sortRepositories();
   } catch (error) {
     console.error('Error loading repositories:', error);
-    const message =
-      error.message ||
-      "We couldn't load GitHub repositories right now. Please try again in a few minutes, or visit my profile directly.";
-    showError(message);
+    showError(getRepoLoadErrorMessage(error));
   } finally {
     showLoading(false);
   }
@@ -1730,6 +1727,26 @@ function toggleView(view) {
     listViewBtn.classList.add('active');
     gridViewBtn.classList.remove('active');
   }
+}
+
+const REPO_LOAD_FALLBACK_MESSAGE =
+  "Latest activity couldn't be loaded right now. Featured work above is always visible — try again later or visit my profile directly.";
+
+function getRepoLoadErrorMessage(error) {
+  const status = error?.status;
+  if (status === 403 || status === 429) {
+    return (
+      error.message ||
+      'GitHub rate limit reached. Try again in a few minutes or visit my profile directly.'
+    );
+  }
+  if (status === 404) {
+    return error.message || 'GitHub user not found. Please check back later.';
+  }
+  if (error?.message && /GitHub API error/i.test(error.message)) {
+    return error.message;
+  }
+  return REPO_LOAD_FALLBACK_MESSAGE;
 }
 
 function showLoading(show) {
