@@ -190,12 +190,15 @@ function buildDescriptionBlock(innerHtml, { empty = false } = {}) {
 
 function initHeroDemoShowcase() {
   const root = document.getElementById('hero-demo');
-  const frame = document.getElementById('hero-demo-frame');
   const urlEl = document.getElementById('hero-demo-url');
   const openBtn = document.getElementById('hero-demo-open');
   const openLabel = openBtn?.querySelector('.hero-demo__open-label');
   const expandBtn = document.getElementById('hero-demo-expand');
   const panel = document.getElementById('hero-demo-panel');
+  const heroPanes = panel?.querySelectorAll('.hero-demo__pane') ?? [];
+  const heroFrames = [...heroPanes]
+    .map((pane) => pane.querySelector('iframe'))
+    .filter(Boolean);
   const tabs = root?.querySelectorAll('.hero-demo__tab');
 
   const popoutRoot = document.getElementById('hero-demo-popout');
@@ -208,7 +211,19 @@ function initHeroDemoShowcase() {
   const popoutCloseTriggers = popoutRoot?.querySelectorAll('[data-popout-close]');
   const demoTabSelector = '#hero-demo .hero-demo__tab, #hero-demo-popout .hero-demo__tab';
 
-  if (!root || !frame || !urlEl || !openBtn || !openLabel || !tabs?.length) return;
+  if (!root || !heroFrames.length || !urlEl || !openBtn || !openLabel || !tabs?.length) {
+    return;
+  }
+
+  function getActiveHeroFrame() {
+    return heroFrames[activeIndex] ?? heroFrames[0];
+  }
+
+  function setActiveHeroPane(index) {
+    heroPanes.forEach((pane, i) => {
+      pane.classList.toggle('is-active', i === index);
+    });
+  }
 
   const prefersReducedMotion = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
@@ -306,7 +321,7 @@ function initHeroDemoShowcase() {
     syncDemoLinks(demo);
 
     popoutFrame.title = `${demo.title} expanded live preview`;
-    const heroSrc = normalizeFrameUrl(frame.src);
+    const heroSrc = normalizeFrameUrl(getActiveHeroFrame().src);
     const startUrl = heroSrc || demo.url;
 
     popoutRoot.classList.add('is-open');
@@ -378,7 +393,7 @@ function initHeroDemoShowcase() {
     return (
       isPopoutOpen() ||
       root.matches(':hover') ||
-      document.activeElement === frame
+      heroFrames.some((f) => document.activeElement === f)
     );
   }
 
@@ -416,30 +431,14 @@ function initHeroDemoShowcase() {
     syncAllDemoTabs(index);
     syncDemoLinks(demo);
 
-    const targetUrl = demo.url;
-    frame.title = `${demo.title} live preview`;
-    updateHeroDemoScale();
+    setActiveHeroPane(index);
 
-    frame.addEventListener(
-      'load',
-      () => {
-        try {
-          frame.contentWindow?.scrollTo(0, 0);
-        } catch {
-          /* cross-origin */
-        }
-        preservePageScroll();
-      },
-      { once: true }
-    );
-
-    if (frame.src !== targetUrl) {
-      frame.src = targetUrl;
-    }
+    const activeFrame = getActiveHeroFrame();
+    activeFrame.title = `${demo.title} live preview`;
 
     if (isPopoutOpen()) {
       popoutFrame.title = `${demo.title} expanded live preview`;
-      setPopoutFrameSrc(targetUrl, { resetScroll: true });
+      setPopoutFrameSrc(demo.url, { resetScroll: true });
     }
   }
 
@@ -472,26 +471,27 @@ function initHeroDemoShowcase() {
     panel.addEventListener('wheel', pauseRotateForInteraction, { passive: true });
   }
 
-  frame.addEventListener('focus', () => {
-    pauseRotateForInteraction();
-    lockPageScroll();
-    preservePageScroll();
-  });
+  heroFrames.forEach((heroFrame) => {
+    heroFrame.addEventListener('focus', () => {
+      pauseRotateForInteraction();
+      lockPageScroll();
+      preservePageScroll();
+    });
 
-  frame.addEventListener('blur', onHeroDisengage);
+    heroFrame.addEventListener('blur', onHeroDisengage);
+    heroFrame.addEventListener('pointerenter', () => {
+      stopRotate();
+      lockPageScroll();
+    });
+    heroFrame.addEventListener('pointerleave', onHeroDisengage);
+    heroFrame.addEventListener('load', preservePageScroll);
+  });
 
   root.addEventListener('pointerenter', () => {
     stopRotate();
     lockPageScroll();
   });
   root.addEventListener('pointerleave', onHeroDisengage);
-  frame.addEventListener('pointerenter', () => {
-    stopRotate();
-    lockPageScroll();
-  });
-  frame.addEventListener('pointerleave', onHeroDisengage);
-
-  frame.addEventListener('load', preservePageScroll);
 
   expandBtn?.addEventListener('click', openPopout);
   popoutClose?.addEventListener('click', closePopout);
@@ -512,8 +512,8 @@ function initHeroDemoShowcase() {
     resizeTimer = setTimeout(updateHeroDemoScale, 120);
   });
 
-  setDemo(0);
   updateHeroDemoScale();
+  setDemo(0);
   startRotate();
 }
 

@@ -662,6 +662,7 @@ body.page-loaded .hero-stagger {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 2.75rem;
   padding: 0.75rem 1rem;
   background: var(--navy-900);
   border-bottom: 1px solid var(--border);
@@ -731,28 +732,40 @@ body.page-loaded .hero-stagger {
   --hero-demo-scale: 0.42;
   --hero-demo-w: 1280px;
   --hero-demo-h: 800px;
+  --hero-stage-w: calc(var(--hero-demo-w) * var(--hero-demo-scale));
+  --hero-stage-h: calc(var(--hero-demo-h) * var(--hero-demo-scale));
   position: relative;
-  height: 320px;
-  overflow: auto;
-  overscroll-behavior: contain;
+  height: var(--hero-stage-h);
+  min-height: var(--hero-stage-h);
+  overflow: hidden;
   background: #0a1420;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(91, 154, 255, 0.45) transparent;
 }
 
-.hero-demo__viewport::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.hero-demo__stage {
+  position: relative;
+  width: var(--hero-stage-w);
+  height: var(--hero-stage-h);
+  margin: 0 auto;
 }
 
-.hero-demo__viewport::-webkit-scrollbar-thumb {
-  background: rgba(91, 154, 255, 0.35);
-  border-radius: 4px;
+.hero-demo__pane {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s var(--ease);
+}
+
+.hero-demo__pane.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .hero-demo__scaler {
-  width: calc(var(--hero-demo-w) * var(--hero-demo-scale));
-  height: calc(var(--hero-demo-h) * var(--hero-demo-scale));
+  width: var(--hero-stage-w);
+  height: var(--hero-stage-h);
   transform-origin: 0 0;
 }
 
@@ -775,9 +788,16 @@ body.page-loaded .hero-stagger {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+  min-height: 3.25rem;
   padding: 0.75rem 1rem;
   background: var(--navy-900);
   border-top: 1px solid var(--border);
+}
+
+.hero-demo__open-label {
+  display: inline-block;
+  min-width: 4.25rem;
+  text-align: left;
 }
 
 .hero-demo__actions-btns {
@@ -2078,7 +2098,6 @@ select:focus-visible {
   }
 
   .hero-demo__viewport {
-    height: 240px;
     --hero-demo-scale: 0.36;
   }
 
