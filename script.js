@@ -1,5 +1,23 @@
 const GITHUB_USERNAME = 'david-foy89';
 
+/** Fallback copy when a repo has no GitHub description field */
+const REPO_DESCRIPTIONS = {
+  Portfolio:
+    'Personal portfolio at davidkfoy.com — featured projects, live GitHub repo feed, animated canvas background, and Formspree contact form.',
+  LastWarTools:
+    'Browser-based toolkit for a mobile strategy game with Firebase sync, screenshot OCR, Claude AI helpers, and multi-language support — built for real daily users.',
+  'TechForum---Advanced-Developer-Q-A-Platform':
+    'Full-stack developer Q&A forum with React, Express, MongoDB, JWT auth, voting, reputation tracking, and responsive dashboards.',
+  'Kanban-Board':
+    'Interactive Kanban board with React, TypeScript, Zustand, and drag-and-drop — add/edit tasks, manage columns, and persist state in localStorage.',
+  Giphy_Project:
+    'Gifs-R-Us: search and browse trending GIFs via the Giphy API with infinite scroll, one-click downloads, and a fully responsive vanilla JavaScript UI.',
+  'Big-Daddy-Dave-s-BBQ':
+    'Restaurant website for Big Daddy Dave\'s BBQ in Erwin, TN — menu highlights, catering, contact, and mobile-friendly pages built with HTML and CSS.',
+  'Task-Management-App':
+    'React todo app with Redux Toolkit — CRUD tasks, All/Active/Completed filters, localStorage persistence, and a contact form with controlled inputs.',
+};
+
 const languageColors = {
   JavaScript: '#f1e05a',
   Python: '#3572A5',
@@ -1108,9 +1126,18 @@ function displayRepositories() {
   applyRevealStagger(projectsGrid);
 }
 
+function getRepoDescription(repo) {
+  const custom = REPO_DESCRIPTIONS[repo.name];
+  if (custom) return custom;
+  const fromGitHub = repo.description?.trim();
+  if (fromGitHub) return fromGitHub;
+  return null;
+}
+
 function createRepositoryCard(repo) {
-  const description = repo.description
-    ? escapeHtml(repo.description)
+  const descriptionText = getRepoDescription(repo);
+  const description = descriptionText
+    ? escapeHtml(descriptionText)
     : '<span class="project-description--empty">No description provided.</span>';
 
   const language = repo.language;
