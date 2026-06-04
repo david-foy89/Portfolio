@@ -16,6 +16,8 @@ const REPO_DESCRIPTIONS = {
     'Restaurant website for Big Daddy Dave\'s BBQ in Erwin, TN — menu highlights, catering, contact, and mobile-friendly pages built with HTML and CSS.',
   'Task-Management-App':
     'React todo app with Redux Toolkit — CRUD tasks, All/Active/Completed filters, localStorage persistence, and a contact form with controlled inputs.',
+  'Pinnacle-Designs':
+    'Marketing site for a local web design agency serving Erwin and the Tri-Cities — conversion-focused layouts, tiered pricing (Starter, Growth, E-Commerce), service-area SEO, and a contact funnel for small business owners.',
 };
 
 const GITHUB_PAGES_USER = 'https://david-foy89.github.io';
@@ -49,6 +51,10 @@ const REPO_LIVE_LINKS = {
   'Task-Management-App': {
     url: 'https://david-foy89.github.io/Task-Management-App/',
     label: 'Live Demo',
+  },
+  'Pinnacle-Designs': {
+    url: 'https://david-foy89.github.io/Pinnacle-Designs/',
+    label: 'Live Site',
   },
 };
 
