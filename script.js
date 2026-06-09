@@ -18,6 +18,10 @@ const REPO_DESCRIPTIONS = {
     'React todo app with Redux Toolkit — CRUD tasks, All/Active/Completed filters, localStorage persistence, and a contact form with controlled inputs.',
   'Pinnacle-Designs':
     'Marketing site for a local web design agency serving Erwin and the Tri-Cities — conversion-focused layouts, tiered pricing (Starter, Growth, E-Commerce), service-area SEO, and a contact funnel for small business owners.',
+  'lone-stone':
+    'Client site for a faith-guided Iowa home builder — new construction, custom cabinetry, and renovations with a portfolio gallery, testimonials, and a project inquiry funnel for Davis County homeowners.',
+  'Starcraft-DS':
+    'Browser-based Starcraft counter lookup tool with multi-wave enemy tagging — helps players pick counters fast, with a companion Windows desktop app for in-game overlays.',
 };
 
 const GITHUB_PAGES_USER = 'https://david-foy89.github.io';
@@ -55,6 +59,14 @@ const REPO_LIVE_LINKS = {
   'Pinnacle-Designs': {
     url: 'https://david-foy89.github.io/Pinnacle-Designs/',
     label: 'Live Site',
+  },
+  'lone-stone': {
+    url: 'https://pinnacle-designs.github.io/lone-stone/',
+    label: 'Live Site',
+  },
+  'Starcraft-DS': {
+    url: 'https://pinnacle-designs.github.io/Starcraft-DS/',
+    label: 'Live Demo',
   },
 };
 
@@ -1537,10 +1549,17 @@ async function loadRepositories() {
 
   try {
     const repos = await fetchGitHub(
-      `/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated&type=owner`
+      `/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated&type=all`
     );
 
-    repositories = repos.filter((repo) => !repo.fork && !repo.archived);
+    const seen = new Set();
+    repositories = repos.filter((repo) => {
+      if (repo.fork || repo.archived) return false;
+      const key = repo.full_name ?? String(repo.id);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
     await enrichReposWithLanguages(repositories);
 
     filteredRepos = [...repositories];
@@ -1672,8 +1691,9 @@ function getRepoLiveLink(repo) {
   }
 
   if (repo.has_pages) {
+    const owner = (repo.owner?.login ?? GITHUB_USERNAME).toLowerCase();
     return {
-      url: `${GITHUB_PAGES_USER}/${repo.name}/`,
+      url: `https://${owner}.github.io/${repo.name}/`,
       label: 'Live Demo',
     };
   }
@@ -1697,12 +1717,19 @@ function createRepositoryCard(repo) {
         </a>`
     : '';
 
+  const ownerLogin = repo.owner?.login ?? GITHUB_USERNAME;
+  const orgBadge =
+    ownerLogin !== GITHUB_USERNAME
+      ? `<a class="project-org" href="https://github.com/${escapeHtml(ownerLogin)}" target="_blank" rel="noopener noreferrer">${escapeHtml(ownerLogin)}</a>`
+      : '';
+
   return `
     <article class="project-card card reveal-child" data-languages="${escapeHtml(languages.join(','))}">
       <div class="project-header">
         <h3 class="project-title">
           <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer">${escapeHtml(repo.name)}</a>
         </h3>
+        ${orgBadge}
       </div>
       ${descriptionBlock}
       ${languageHtml}
